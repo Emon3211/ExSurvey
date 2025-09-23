@@ -1,0 +1,182 @@
+<!DOCTYPE: html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopUp History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .header .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-details {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .history-details strong {
+            color: #333;
+        }
+        .history-details span {
+            color: #666;
+        }
+        .status {
+            font-weight: bold;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .status.pending {
+            background-color: #ffc107;
+            color: #fff;
+        }
+        .status.completed {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .status.cancelled {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .no-history {
+            text-align: center;
+            color: #888;
+            font-size: 18px;
+            padding: 50px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">&#x2190;</button>
+        <h1>TopUp History</h1>
+    </div>
+
+    <ul id="history-list" class="history-list">
+        </ul>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Check auth state to get the logged-in user's ID
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in, load their top-up history
+            loadTopUpHistory(user.uid);
+        } else {
+            // No user is signed in. You might want to redirect to a login page.
+            const list = document.getElementById('history-list');
+            list.innerHTML = `<li class="no-history">Please log in to view your history.</li>`;
+        }
+    });
+
+    function loadTopUpHistory(userId) {
+        const historyRef = database.ref('topup_request')
+                                 .orderByChild('userId')
+                                 .equalTo(userId)
+                                 .limitToLast(10); // Fetch the last 10 requests
+
+        const list = document.getElementById('history-list');
+
+        historyRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            const historyItems = [];
+
+            if (!data) {
+                list.innerHTML = `<li class="no-history">No top-up history found.</li>`;
+                return;
+            }
+
+            // Convert object to array and reverse to show latest on top
+            for (let key in data) {
+                if (data.hasOwnProperty(key)) {
+                    historyItems.push(data[key]);
+                }
+            }
+            historyItems.reverse(); // Newest items will be at the beginning
+
+            list.innerHTML = ''; // Clear previous list items
+            
+            historyItems.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                const itemHtml = `
+                    <li class="history-item">
+                        <div class="history-details">
+                            <strong>Status:</strong> <span class="status ${item.status}">${item.status.toUpperCase()}</span><br>
+                            <strong>Amount:</strong> <span>${item.amount} BDT (${item.diamondPackage} Daimonds)</span><br>
+                            <strong>Player ID:</strong> <span>${item.playerId}</span><br>
+                            <strong>Transaction ID:</strong> <span>${item.transactionId}</span><br>
+                            <strong>Method:</strong> <span>${item.paymentMethod}</span><br>
+                            <strong>Payment No:</strong> <span>${item.paymentNumber}</span><br>
+                            <strong>Date:</strong> <span>${date}</span>
+                        </div>
+                    </li>
+                `;
+                list.innerHTML += itemHtml;
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
