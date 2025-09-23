@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+        .job-details-card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .job-details-card h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .job-details-card .job-price {
+            font-size: 1.5em;
+            color: #28a745;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 20px;
+        }
+        .job-details-card h2 {
+            margin-top: 30px;
+            color: #555;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .instructions ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .instructions li {
+            background-color: #e9ecef;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .job-link-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        .submission-box {
+            margin-top: 30px;
+        }
+        .submission-box h2 {
+            color: #555;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .submission-box textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        .submission-box .submit-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .contact-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .contact-item span {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .contact-item .number-display {
+            font-size: 1em;
+            color: #007bff;
+        }
+        .contact-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    
+<div class="header">
+    <button class="back-btn" onclick="history.back()">Back</button>
+</div>
+
+<div class="job-details-card" id="job-details">
+    <h1 id="job-title">Loading...</h1>
+    <span id="job-price" class="job-price"></span>
+    
+    <div class="instructions">
+        <h2>Job Instructions</h2>
+        <a id="job-link" href="#" class="job-link-btn" target="_blank" style="display:none;">Go to Job Link</a>
+        <ul id="job-instructions">
+        </ul>
+    </div>
+
+    <div class="submission-box">
+        <div class="contact-info">
+            <div class="contact-item">
+                <span>Screenshot Send (WhatsApp):</span>
+                <span id="whatsapp-number" class="number-display">N/A</span>
+                <button onclick="copyNumber('whatsapp-number')">Copy</button>
+            </div>
+            <p id="copy-message"></p>
+        </div>
+        <h2>Submit Your Work</h2>
+        <p id="submission-text"></p>
+        <textarea id="submission-textarea" placeholder="Submit your work here..."></textarea>
+        <button id="submit-btn" class="submit-btn">Submit</button>
+        <p id="message"></p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, get, child, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    // আপনার Firebase কনফিগারেশন
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth(app);
+    const dbRef = ref(database);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobId = urlParams.get('id');
+    const jobDetailsCard = document.getElementById('job-details');
+    const messageElement = document.getElementById('message');
+    const submitBtn = document.getElementById('submit-btn');
+    const submissionTextarea = document.getElementById('submission-textarea');
+
+    const whatsappNumberElement = document.getElementById('whatsapp-number');
+    const copyMessageElement = document.getElementById('copy-message');
+
+    let currentUserId = null;
+    let jobBalance = 0; // New variable to store the job's balance
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUserId = user.uid;
+            fetchJobDetails();
+        } else {
+            fetchJobDetails();
+            showMessage('Please log in to submit this job.', 'error');
+            submitBtn.disabled = true;
+        }
+    });
+
+    function fetchJobDetails() {
+        if (jobId) {
+            get(child(dbRef, `jobs/${jobId}`))
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const job = snapshot.val();
+                        document.getElementById('job-title').textContent = job.title;
+                        document.getElementById('job-price').textContent = `$${job.balance.toFixed(2)}`;
+                        document.getElementById('submission-text').textContent = job.submissionText;
+                        
+                        jobBalance = job.balance; // Store the balance for submission
+
+                        const jobLinkBtn = document.getElementById('job-link');
+                        if (job.jobLink) {
+                            jobLinkBtn.href = job.jobLink;
+                            jobLinkBtn.style.display = 'inline-block';
+                        } else {
+                            jobLinkBtn.style.display = 'none';
+                        }
+
+                        const instructionsList = document.getElementById('job-instructions');
+                        if (job.instructions) {
+                            instructionsList.innerHTML = '';
+                            if (Array.isArray(job.instructions)) {
+                                job.instructions.forEach(instruction => {
+                                    const li = document.createElement('li');
+                                    li.textContent = instruction;
+                                    instructionsList.appendChild(li);
+                                });
+                            } else if (typeof job.instructions === 'object') {
+                                for (const key in job.instructions) {
+                                    const li = document.createElement('li');
+                                    li.textContent = job.instructions[key];
+                                    instructionsList.appendChild(li);
+                                }
+                            }
+                        }
+                    } else {
+                        jobDetailsCard.innerHTML = "<h1>Sorry, this job could not be found.</h1>";
+                        submitBtn.disabled = true;
+                    }
+                })
+                .catch((error) => {
+                    jobDetailsCard.innerHTML = "<h1>Error loading job details.</h1>";
+                    console.error("Error fetching job:", error);
+                    submitBtn.disabled = true;
+                });
+            
+            // Fetch the single WhatsApp number
+            get(child(dbRef, `support/whatsapp`))
+                .then((snapshot) => {
+                    if (snapshot.exists() && snapshot.val()) {
+                        whatsappNumberElement.textContent = snapshot.val();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching WhatsApp number:", error);
+                });
+
+        } else {
+            jobDetailsCard.innerHTML = "<h1>No job ID specified.</h1>";
+            submitBtn.disabled = true;
+        }
+    }
+
+    submitBtn.addEventListener('click', () => {
+        if (!currentUserId) {
+            showMessage('Please log in to submit a job.', 'error');
+            return;
+        }
+
+        const submissionText = submissionTextarea.value;
+        if (submissionText.trim() === '') {
+            showMessage('Please provide your work submission.', 'error');
+            return;
+        }
+        
+        const submissionData = {
+            jobId: jobId,
+            userId: currentUserId,
+            submission: submissionText,
+            amount: jobBalance, // Add the job balance to the submission data
+            timestamp: new Date().toISOString(),
+            status: 'Pending'
+        };
+
+        const jobHistoryRef = ref(database, 'job_history');
+        push(jobHistoryRef, submissionData)
+            .then(() => {
+                showMessage('Submission successful! Thank you.', 'success');
+                submissionTextarea.value = '';
+            })
+            .catch((error) => {
+                showMessage('Submission failed. Please try again.', 'error');
+                console.error("Error submitting job:", error);
+            });
+    });
+
+    function showMessage(msg, type) {
+        messageElement.textContent = msg;
+        messageElement.className = type;
+    }
+
+    window.copyNumber = function(elementId) {
+        const numberText = document.getElementById(elementId).textContent;
+        if (numberText && numberText !== 'N/A') {
+            navigator.clipboard.writeText(numberText).then(() => {
+                copyMessageElement.textContent = 'Copied!';
+                copyMessageElement.className = 'success';
+                setTimeout(() => {
+                    copyMessageElement.textContent = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                copyMessageElement.textContent = 'Failed to copy!';
+                copyMessageElement.className = 'error';
+            });
+        }
+    };
+</script>
+
+</body>
+</html>
