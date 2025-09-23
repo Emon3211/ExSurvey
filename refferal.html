@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>ExSurvey Referral</title>
+  <script>
+    // Simple session check & back button
+    function goBack() {
+      // এখানে সেশন চেক করবেন আপনার লজিক দিয়ে
+      // উদাহরণ:
+      let loggedIn = true; 
+      if (loggedIn) {
+        window.history.back();
+      } else {
+        alert("আপনি লগইন করেননি!");
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+  <!-- Header -->
+  <header class="bg-blue-600 text-white p-4 flex justify-between items-center">
+    <h1 class="text-lg font-bold">ExSurvey Referral</h1>
+    <button onclick="goBack()" class="bg-white text-blue-600 px-3 py-1 rounded shadow">
+      Back
+    </button>
+  </header>
+
+  <!-- Content -->
+  <main class="flex-1 p-4 space-y-4 text-gray-800">
+    <p>আপনার আমন্তরিত বন্ধুকে আবশ্যই আপনার রেফার কোড হিসাবে <b>আপনার ইউজার নাম</b> ব্যবহার করতে হবে না হলে রেফার হবে না।</p>
+
+    <p>রেফার সম্পূর্ণ করতে আপনার বন্ধুকে কাজ করে প্রথম উইড্র করতে হবে। আপনার বন্ধু প্রথম উইড্র করলে আপনি আপনার রেফার বোনাস দাবি করতে পারবেন।</p>
+
+    <ul class="list-disc list-inside space-y-2">
+      <li>সর্বনিম্ন উইড্র হলো <b>৫ ডলার</b>।</li>
+      <li>মোবাইল রিচার্জ <b>২০ টাকা</b> সম পরিমাণ ডলার হলে রিচার্জ দিতে পারবেন।</li>
+    </ul>
+
+    <p>রেফার বোনাস পেতে এডমিনকে মেসেজ করবেন নিচের স্কিনশট সহ:</p>
+    <ul class="list-disc list-inside space-y-2">
+      <li>আপনার রেফার লিস্ট</li>
+      <li>আপনার বন্ধুর প্রোফাইল</li>
+      <li>আপনার বন্ধুর Transaction History</li>
+    </ul>
+
+    <p>সব কিছু ঠিক থাকলে আবেদন করার <b>২৪ ঘন্টার</b> মধ্যে টাকা এড হবে আপনার একাউন্টে।</p>
+    <p><b>রেফার বোনাস:</b> $0.20</p>
+
+    <p class="text-red-600 font-semibold">⚠️ একাউন্ট খোলার সময় সব সঠিক তথ্য দিয়ে একাউন্ট খুলতে হবে। না হলে রেফার বোনাস ও উইড্র তুলতে পারবেন না এবং একাউন্ট বন্ধ করে দেওয়া হবে।</p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white text-center p-3">
+    &copy; 2025 ExSurvey | All Rights Reserved
+  </footer>
+</body>
+</html>
