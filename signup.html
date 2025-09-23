@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - ExSurvey</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/css/intlTelInput.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+        .nav-container {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .left-link {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .center-btn {
+            flex-grow: 1;
+            text-align: center;
+        }
+        .right-btn {
+            flex-grow: 1;
+            text-align: right;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 16px;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .btn-login {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .btn-login:hover {
+            background-color: #0056b3;
+        }
+        .btn-signup {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .btn-signup:hover {
+            background-color: #218838;
+        }
+        .signup-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .signup-box {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .signup-box h2 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .input-group .validation-feedback {
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-group .validation-feedback.valid {
+            color: green;
+            display: block;
+        }
+        .input-group .validation-feedback.invalid {
+            color: red;
+            display: block;
+        }
+        .input-with-button {
+            display: flex;
+            align-items: center;
+        }
+        .input-with-button input {
+            flex-grow: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .input-with-button .code-btn {
+            padding: 12px 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .input-with-button .code-btn:hover {
+            background-color: #0056b3;
+        }
+        .input-with-button .code-btn.verify {
+            background-color: #28a745;
+        }
+        .input-with-button .code-btn.verify:hover {
+            background-color: #218838;
+        }
+        .phone-input-container {
+            display: flex;
+            align-items: center;
+        }
+        .phone-input-container #phone {
+            width: 100%;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .iti--allow-dropdown {
+            width: 100% !important;
+        }
+        .password-container {
+            position: relative;
+        }
+        .password-container .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #aaa;
+        }
+        .password-container .toggle-password:hover {
+            color: #555;
+        }
+        .password-validation-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #555;
+            display: none; /* Initially hide the list */
+        }
+        .password-validation-list li.valid {
+            color: green;
+        }
+        .password-validation-list li.invalid {
+            color: red;
+        }
+        .gender-options {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .gender-options label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .gender-options input {
+            width: auto;
+            margin-right: 5px;
+        }
+        .terms-checkbox {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .terms-checkbox input {
+            width: auto;
+            margin-right: 10px;
+        }
+        .signup-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .signup-btn:hover {
+            background-color: #218838;
+        }
+        .footer {
+            background-color: #333;
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: auto;
+        }
+        .footer-image img {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .footer-content {
+            margin-bottom: 20px;
+        }
+        .footer-content h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .footer-content p {
+            margin: 5px 0;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .footer-links li {
+            margin: 10px 0;
+        }
+        .footer-links a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-links a:hover {
+            color: #007bff;
+        }
+        .social-icons {
+            margin-top: 20px;
+        }
+        .social-icons a {
+            color: #fff;
+            font-size: 24px;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .social-icons a:hover {
+            color: #007bff;
+        }
+        .copyright {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #bbb;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">ExSurvey</div>
+    </header>
+
+    <div class="nav-container">
+        <div class="left-link">
+            <a href="index.html" class="nav-link">Home</a>
+        </div>
+        <div class="center-btn">
+            <button class="btn btn-login" onclick="window.location.href='login.html'">Login</button>
+        </div>
+        <div class="right-btn">
+            <button class="btn btn-signup" onclick="window.location.href='signup.html'">Sign Up</button>
+        </div>
+    </div>
+
+    <main class="signup-container">
+        <div class="signup-box">
+            <h2>Create a new account</h2>
+            <form id="signupForm" action="#" method="post">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Min. 6 characters" required>
+                    <span id="username-feedback" class="validation-feedback"></span>
+                </div>
+                <div class="input-group">
+                    <label for="fullname">Full Name</label>
+                    <input type="text" id="fullname" name="fullname" placeholder="Min. 8 characters" required>
+                    <span id="fullname-feedback" class="validation-feedback"></span>
+                </div>
+                <div class="input-group">
+                    <label>Gender</label>
+                    <div class="gender-options">
+                        <label><input type="radio" name="gender" value="male" required> Male</label>
+                        <label><input type="radio" name="gender" value="female" required> Female</label>
+                        <label><input type="radio" name="gender" value="other" required> Other</label>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="country">Country</label>
+                    <select id="country" name="country" required></select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                    <span id="email-feedback" class="validation-feedback"></span>
+                </div>
+                
+                <div class="input-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" required>
+                    <span id="address-feedback" class="validation-feedback"></span>
+                </div>
+                <div class="input-group">
+                    <label for="zipcode">Zip Code</label>
+                    <input type="text" id="zipcode" name="zipcode" required>
+                    <span id="zipcode-feedback" class="validation-feedback"></span>
+                </div>
+                <div class="input-group">
+                    <label for="referralCode">Referral Code (Optional)</label>
+                    <input type="text" id="referralCode" name="referralCode" placeholder="Enter referral username here">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" required>
+                        <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
+                    </div>
+                    <ul class="password-validation-list">
+                        <li id="length">At least 8 characters</li>
+                        <li id="number">At least one number</li>
+                        <li id="letter">At least one letter</li>
+                        <li id="symbol">At least one symbol</li>
+                    </ul>
+                </div>
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">I agree to the <a href="terms.html" target="_blank">Terms and Privacy Policy</a></label>
+                </div>
+                <button type="submit" class="signup-btn">Sign Up</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-image">
+             <img src="https://via.placeholder.com/150x150.png?text=Contact+Icon" alt="Contact Icon">
+        </div>
+        <div class="footer-content">
+            <h3>Contact Us Now</h3>
+            <p>Email: <a href="mailto:support@exsurvey.com" style="color: #fff; text-decoration: none;">support@exsurvey.com</a></p>
+            <p><a href="mailto:exsurveyteam@gmail.com" style="color: #fff; text-decoration: none;">Leave a message</a></p>
+        </div>
+        <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="about.html">About Us</a></li>
+        </ul>
+        <div class="social-icons">
+            <p>Social:</p>
+            <a href="https://www.youtube.com/@ExSurvey" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61580025557448" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://chat.whatsapp.com/KDm94eBzNHMHwJY04raNqA" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="copyright">
+            <p>© 2025 ExSurvey. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/intlTelInput.min.js"></script>
+    <script>
+        const countries = [
+            { "name": "Afghanistan", "code": "AF" },
+            { "name": "Albania", "code": "AL" },
+            { "name": "Algeria", "code": "DZ" },
+            { "name": "Andorra", "code": "AD" },
+            { "name": "Angola", "code": "AO" },
+            { "name": "Argentina", "code": "AR" },
+            { "name": "Australia", "code": "AU" },
+            { "name": "Austria", "code": "AT" },
+            { "name": "Bangladesh", "code": "BD" },
+            { "name": "Belgium", "code": "BE" },
+            { "name": "Bhutan", "code": "BT" },
+            { "name": "Brazil", "code": "BR" },
+            { "name": "Canada", "code": "CA" },
+            { "name": "China", "code": "CN" },
+            { "name": "Denmark", "code": "DK" },
+            { "name": "Egypt", "code": "EG" },
+            { "name": "Finland", "code": "FI" },
+            { "name": "France", "code": "FR" },
+            { "name": "Germany", "code": "DE" },
+            { "name": "Greece", "code": "GR" },
+            { "name": "India", "code": "IN" },
+            { "name": "Indonesia", "code": "ID" },
+            { "name": "Ireland", "code": "IE" },
+            { "name": "Italy", "code": "IT" },
+            { "name": "Japan", "code": "JP" },
+            { "name": "Malaysia", "code": "MY" },
+            { "name": "Mexico", "code": "MX" },
+            { "name": "Nepal", "code": "NP" },
+            { "name": "Netherlands", "code": "NL" },
+            { "name": "New Zealand", "code": "NZ" },
+            { "name": "Norway", "code": "NO" },
+            { "name": "Pakistan", "code": "PK" },
+            { "name": "Philippines", "code": "PH" },
+            { "name": "Poland", "code": "PL" },
+            { "name": "Portugal", "code": "PT" },
+            { "name": "Qatar", "code": "QA" },
+            { "name": "Russia", "code": "RU" },
+            { "name": "Saudi Arabia", "code": "SA" },
+            { "name": "Singapore", "code": "SG" },
+            { "name": "South Africa", "code": "ZA" },
+            { "name": "South Korea", "code": "KR" },
+            { "name": "Spain", "code": "ES" },
+            { "name": "Sweden", "code": "SE" },
+            { "name": "Switzerland", "code": "CH" },
+            { "name": "Thailand", "code": "TH" },
+            { "name": "Turkey", "code": "TR" },
+            { "name": "Ukraine", "code": "UA" },
+            { "name": "United Arab Emirates", "code": "AE" },
+            { "name": "United Kingdom", "code": "GB" },
+            { "name": "United States", "code": "US" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const countrySelect = document.getElementById('country');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.code;
+                option.textContent = country.name;
+                countrySelect.appendChild(option);
+            });
+
+            const form = document.getElementById('signupForm');
+            const fields = [
+                { id: 'username', minLength: 6, feedbackId: 'username-feedback', message: "Username must be at least 6 characters." },
+                { id: 'fullname', minLength: 8, feedbackId: 'fullname-feedback', message: "Full name must be at least 8 characters." },
+                { id: 'email', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, feedbackId: 'email-feedback', message: "Please enter a valid email address." },
+                { id: 'address', minLength: 1, feedbackId: 'address-feedback', message: "Address is required." },
+                { id: 'zipcode', pattern: /^\d{4,10}$/, feedbackId: 'zipcode-feedback', message: "Please enter a valid zip code." }
+            ];
+
+            const updateValidationFeedback = (element, isValid, message) => {
+                element.style.display = 'block';
+                if (isValid) {
+                    element.classList.add('valid');
+                    element.classList.remove('invalid');
+                    element.textContent = "Looks good!";
+                } else {
+                    element.classList.add('invalid');
+                    element.classList.remove('valid');
+                    element.textContent = message;
+                }
+            };
+            
+            // Basic validation for form fields
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const feedback = document.getElementById(field.feedbackId);
+
+                if (input) {
+                    input.addEventListener('input', () => {
+                        let isValid = false;
+                        if (field.minLength) {
+                            isValid = input.value.length >= field.minLength;
+                        } else if (field.pattern) {
+                            isValid = field.pattern.test(input.value);
+                        }
+                        
+                        // We will handle username and email separately for database checks
+                        if (field.id !== 'username' && field.id !== 'email') {
+                            updateValidationFeedback(feedback, isValid, field.message);
+                        }
+                    });
+                }
+            });
+
+            const passwordInput = document.getElementById('password');
+            const passwordValidationList = document.querySelector('.password-validation-list');
+            const conditions = [
+                { element: document.getElementById('length'), pattern: /.{8,}/, message: 'At least 8 characters' },
+                { element: document.getElementById('number'), pattern: /[0-9]/, message: 'At least one number' },
+                { element: document.getElementById('letter'), pattern: /[a-zA-Z]/, message: 'At least one letter' },
+                { element: document.getElementById('symbol'), pattern: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, message: 'At least one symbol' }
+            ];
+
+            passwordInput.addEventListener('input', () => {
+                const password = passwordInput.value;
+                if (password.length > 0) {
+                    passwordValidationList.style.display = 'block';
+                    conditions.forEach(cond => {
+                        if (cond.pattern.test(password)) {
+                            cond.element.classList.add('valid');
+                            cond.element.classList.remove('invalid');
+                        } else {
+                            cond.element.classList.add('invalid');
+                            cond.element.classList.remove('valid');
+                        }
+                    });
+                } else {
+                    passwordValidationList.style.display = 'none';
+                }
+            });
+
+            const togglePassword = document.getElementById('togglePassword');
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.classList.toggle('fa-eye');
+                togglePassword.classList.toggle('fa-eye-slash');
+            });
+        });
+    </script>
+    
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+          authDomain: "exsurvey-1c78a.firebaseapp.com",
+          databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+          projectId: "exsurvey-1c78a",
+          storageBucket: "exsurvey-1c78a.firebasestorage.app",
+          messagingSenderId: "754959615386",
+          appId: "1:754959615386:web:65c390db232a7dafd3e623",
+          measurementId: "G-8SQNS2DLBT"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Initialize intl-tel-input
+        const phoneInput = document.getElementById("phone");
+        const iti = intlTelInput(phoneInput, {
+            initialCountry: "bd", // Default country set here
+            preferredCountries: ["bd", "in", "us", "gb"],
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/utils.js"
+        });
+
+        const signupForm = document.getElementById('signupForm');
+        
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const usernameFeedback = document.getElementById('username-feedback');
+        const emailFeedback = document.getElementById('email-feedback');
+
+        // Function to update validation feedback
+        const updateValidationFeedback = (element, isValid, message) => {
+            element.style.display = 'block';
+            if (isValid) {
+                element.classList.add('valid');
+                element.classList.remove('invalid');
+                element.textContent = "Looks good!";
+            } else {
+                element.classList.add('invalid');
+                element.classList.remove('valid');
+                element.textContent = message;
+            }
+        };
+
+        // Live validation for Username
+        usernameInput.addEventListener('blur', async () => {
+            const username = usernameInput.value;
+            if (username.length < 6) {
+                updateValidationFeedback(usernameFeedback, false, "Username must be at least 6 characters.");
+                return;
+            }
+
+            const usernameRef = database.ref('users').orderByChild('username').equalTo(username);
+            const usernameSnapshot = await usernameRef.once('value');
+            if (usernameSnapshot.exists()) {
+                updateValidationFeedback(usernameFeedback, false, "This username is already taken.");
+            } else {
+                updateValidationFeedback(usernameFeedback, true, "");
+            }
+        });
+
+        // Live validation for Email
+        emailInput.addEventListener('blur', async () => {
+            const email = emailInput.value;
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                updateValidationFeedback(emailFeedback, false, "Please enter a valid email address.");
+                return;
+            }
+
+            const emailRef = database.ref('users').orderByChild('email').equalTo(email);
+            const emailSnapshot = await emailRef.once('value');
+            if (emailSnapshot.exists()) {
+                updateValidationFeedback(emailFeedback, false, "This email is already registered.");
+            } else {
+                updateValidationFeedback(emailFeedback, true, "");
+            }
+        });
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Check if live validation has passed before proceeding
+            const isUsernameValid = usernameFeedback.classList.contains('valid');
+            const isEmailValid = emailFeedback.classList.contains('valid');
+
+            if (!isUsernameValid) {
+                alert("Please enter a valid and unique username.");
+                return;
+            }
+            if (!isEmailValid) {
+                alert("Please enter a valid and unique email address.");
+                return;
+            }
+
+            const username = signupForm.username.value;
+            const email = signupForm.email.value;
+            const password = signupForm.password.value;
+            const phone = iti.getNumber();
+            const referralCode = signupForm.referralCode.value || null;
+
+            try {
+                // Create a new user using Firebase Authentication
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Send email verification link
+                await user.sendEmailVerification();
+
+                // Save user data to the database
+                const userData = {
+                    username: username,
+                    fullname: signupForm.fullname.value,
+                    gender: document.querySelector('input[name="gender"]:checked').value,
+                    country: signupForm.country.value,
+                    email: email,
+                    phone: phone,
+                    address: signupForm.address.value,
+                    zipcode: signupForm.zipcode.value,
+                    referralCode: referralCode,
+                    balance: 0.00,
+                    is_admin: false
+                };
+
+                await database.ref('users/' + user.uid).set(userData);
+                
+                // Add notifications for the new user and admin
+                const timestamp = new Date().toISOString();
+
+                const userNotification1 = {
+                    title: "Welcome to ExSurvey!",
+                    message: "Your Account has been successfully created. You can now log in.",
+                    timestamp: timestamp,
+                    read: false
+                };
+                const userNotification2 = {
+                    title: "Ready to Earn?",
+                    message: "You can start your earning journey by exploring our micro jobs and other services.",
+                    timestamp: timestamp,
+                    read: false
+                };
+                await database.ref('users/' + user.uid + '/notifications').push(userNotification1);
+                await database.ref('users/' + user.uid + '/notifications').push(userNotification2);
+
+                const adminRef = database.ref('admin_notification');
+                const adminNotification = {
+                    title: "New User Signup",
+                    message: `A new user has signed up. Username: ${username}, UID: ${user.uid}`,
+                    timestamp: timestamp,
+                    read: false
+                };
+                await adminRef.child('notifications').push(adminNotification);
+
+                alert("Account signup successful! A verification link has been sent to your email. Please check your inbox and spam folder to verify your account. You will now be redirected to the login page.");
+                
+                // Redirect to the login page
+                window.location.href = 'login.html';
+
+            } catch (error) {
+                alert("Error during registration: " + error.message);
+                console.error("Firebase Auth or DB Error:", error);
+            }
+        });
+    </script>
+</body>
+</html>
