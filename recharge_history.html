@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recharge History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 15px;
+      position: relative;
+    }
+    .header h1 {
+      font-size: 26px;
+      color: #333;
+      margin: 0;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #555;
+      text-decoration: none;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    #recharge-history-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .history-item {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .item-details {
+      flex-grow: 1;
+    }
+    .item-details h4 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+      color: #333;
+    }
+    .item-details p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+    .item-status {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .status-pending {
+      background-color: #ffc107;
+      color: #333;
+    }
+    .status-approved {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .status-rejected {
+      background-color: #dc3545;
+      color: #fff;
+    }
+    .message {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #333;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="#" class="back-btn" onclick="goBack()">&#8592;</a>
+      <h1>Recharge History</h1>
+    </div>
+    <ul id="recharge-history-list"></ul>
+    <p id="history-status-message" class="message">Loading history...</p>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const rechargeHistoryList = document.getElementById("recharge-history-list");
+    const historyStatusMessage = document.getElementById("history-status-message");
+
+    function fetchRechargeHistory(userId) {
+      historyStatusMessage.textContent = "Loading history...";
+      historyStatusMessage.className = "message";
+      rechargeHistoryList.innerHTML = "";
+
+      const rechargeRef = database.ref("recharge_history");
+
+      // এখানে পরিবর্তন করা হয়েছে: orderByChild("timestamp") এবং limitToLast(10) যোগ করা হয়েছে
+      rechargeRef
+        .orderByChild("timestamp")
+        .limitToLast(10)
+        .once("value", (snapshot) => {
+          const historyData = snapshot.val();
+
+          if (historyData) {
+            const historyItems = Object.values(historyData);
+            
+            // নতুনগুলো উপরে দেখানোর জন্য রিভার্স সর্ট করা হয়েছে
+            historyItems.sort((a, b) => b.timestamp - a.timestamp);
+
+            if (historyItems.length === 0) {
+              historyStatusMessage.textContent = "No recharge history found.";
+              return;
+            }
+
+            historyItems.forEach((item) => {
+              const date = item.timestamp
+                ? new Date(item.timestamp).toLocaleString()
+                : "N/A";
+
+              const statusClass = item.status
+                ? `status-${item.status.toLowerCase()}`
+                : "status-pending";
+
+              const amountBDT = Number(item.amount_bdt) || 0;
+              const amountUSD = Number(item.amount_dollar) || 0;
+              const offerInfo = item.offer_name
+                ? `<p>Offer: ${item.offer_name}</p>`
+                : "";
+
+              const li = document.createElement("li");
+              li.className = "history-item";
+
+              li.innerHTML = `
+                <div class="item-details">
+                  <h4>Recharge to ${item.mobileNumber || "Unknown"} (${item.operator || "N/A"})</h4>
+                  <p>Amount (BDT): ${amountBDT.toFixed(2)}</p>
+                  <p>Cost (USD): $${amountUSD.toFixed(2)}</p>
+                  ${offerInfo}
+                  <p>Date: ${date}</p>
+                </div>
+                <span class="item-status ${statusClass}">${item.status || "Pending"}</span>
+              `;
+              rechargeHistoryList.appendChild(li);
+            });
+            historyStatusMessage.textContent = "";
+          } else {
+            historyStatusMessage.textContent = "No recharge history found.";
+          }
+        },
+        (error) => {
+          console.error("Firebase History Read Error:", error);
+          historyStatusMessage.textContent = "Failed to load history.";
+          historyStatusMessage.classList.add("error");
+        });
+    }
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        fetchRechargeHistory(user.uid);
+      } else {
+        historyStatusMessage.textContent = "Please log in to view your history.";
+      }
+    });
+
+    function goBack() {
+      window.history.back();
+    }
+  </script>
+</body>
+</html>
