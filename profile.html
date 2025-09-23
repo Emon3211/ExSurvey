@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .back-btn {
+            background-color: #555;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .profile-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .profile-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+        .profile-item span:first-child {
+            font-weight: bold;
+            color: #555;
+        }
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .profile-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .password-btn {
+            background-color: #dc3545;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .modal-form input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .password-validation-list {
+            list-style-type: none;
+            padding: 0;
+            font-size: 12px;
+            color: #777;
+        }
+        .validation-item {
+            color: red;
+            display: list-item;
+        }
+        .validation-item.valid {
+            color: green;
+        }
+        .password-toggle {
+            position: relative;
+        }
+        .password-toggle input {
+            padding-right: 40px;
+        }
+        .password-toggle .toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+        }
+        /* New CSS for on-page messages */
+        .message-container {
+            padding: 15px;
+            margin: 20px auto;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            max-width: 600px;
+            display: none; /* Initially hidden */
+        }
+
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Your Profile</h1>
+    <a href="dashboard.html" class="back-btn">Back</a>
+</div>
+
+<div id="messageContainer" class="message-container">
+    <p id="messageText"></p>
+</div>
+
+<div class="profile-container">
+    <h2>Profile Information</h2>
+    <div class="profile-item">
+        <span>Username:</span>
+        <span id="profile-username">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Full Name:</span>
+        <span id="profile-fullname">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Refferal Code:</span>
+        <span id="profile-referred-by">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Gender:</span>
+        <span id="profile-gender">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Country:</span>
+        <span id="profile-country">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Phone:</span>
+        <span id="profile-phone">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Email:</span>
+        <span id="profile-email">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Address:</span>
+        <span id="profile-address">Loading...</span>
+    </div>
+    <div class="profile-item">
+        <span>Zip Code:</span>
+        <span id="profile-zip">Loading...</span>
+    </div>
+
+    <div class="button-group">
+        <button class="profile-btn" id="update-profile-btn">Profile Update</button>
+        <button class="profile-btn password-btn" id="change-password-btn">Change Password</button>
+    </div>
+</div>
+
+<div id="updateProfileModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Update Profile</h2>
+        <form class="modal-form">
+            <label for="modal-fullname">Full Name</label>
+            <input type="text" id="modal-fullname">
+            <label for="modal-phone">Phone</label>
+            <input type="text" id="modal-phone">
+            <label for="modal-address">Address</label>
+            <input type="text" id="modal-address">
+            <label for="modal-zip">Zip Code</label>
+            <input type="text" id="modal-zip">
+            <button type="button" class="save-btn" id="save-profile-btn">Save</button>
+        </form>
+    </div>
+</div>
+
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Change Password</h2>
+        <form class="modal-form">
+            <label for="old-password">Old Password</label>
+            <div class="password-toggle">
+                <input type="password" id="old-password">
+                <button type="button" class="toggle-btn" data-target="old-password">Show</button>
+            </div>
+
+            <label for="new-password">New Password</label>
+            <div class="password-toggle">
+                <input type="password" id="new-password">
+                <button type="button" class="toggle-btn" data-target="new-password">Show</button>
+            </div>
+            
+            <ul class="password-validation-list">
+                <li id="length-check" class="validation-item">At least 8 characters</li>
+                <li id="number-check" class="validation-item">At least 1 number</li>
+                <li id="uppercase-check" class="validation-item">At least 1 uppercase letter</li>
+                <li id="symbol-check" class="validation-item">At least 1 symbol (@$!%*?&)</li>
+            </ul>
+            
+            <label for="retype-new-password">Retype New Password</label>
+            <div class="password-toggle">
+                <input type="password" id="retype-new-password">
+                <button type="button" class="toggle-btn" data-target="retype-new-password">Show</button>
+            </div>
+            
+            <button type="button" class="save-btn" id="update-password-btn">Update Password</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    // ⚙️ Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // DOM Elements
+    const updateProfileModal = document.getElementById("updateProfileModal");
+    const changePasswordModal = document.getElementById("changePasswordModal");
+    const updateProfileBtn = document.getElementById("update-profile-btn");
+    const changePasswordBtn = document.getElementById("change-password-btn");
+    const closeBtns = document.querySelectorAll(".close-btn");
+    const saveProfileBtn = document.getElementById("save-profile-btn");
+    const updatePasswordBtn = document.getElementById("update-password-btn");
+    const profileUsername = document.getElementById("profile-username");
+    const profileFullName = document.getElementById("profile-fullname");
+    const profileReferredBy = document.getElementById("profile-referred-by");
+    const profileGender = document.getElementById("profile-gender");
+    const profileCountry = document.getElementById("profile-country");
+    const profilePhone = document.getElementById("profile-phone");
+    const profileEmail = document.getElementById("profile-email");
+    const profileAddress = document.getElementById("profile-address");
+    const profileZip = document.getElementById("profile-zip");
+    const modalFullName = document.getElementById("modal-fullname");
+    const modalPhone = document.getElementById("modal-phone");
+    const modalAddress = document.getElementById("modal-address");
+    const modalZip = document.getElementById("modal-zip");
+    const oldPasswordInput = document.getElementById("old-password");
+    const newPasswordInput = document.getElementById("new-password");
+    const retypePasswordInput = document.getElementById("retype-new-password");
+    const lengthCheck = document.getElementById("length-check");
+    const numberCheck = document.getElementById("number-check");
+    const uppercaseCheck = document.getElementById("uppercase-check");
+    const symbolCheck = document.getElementById("symbol-check");
+
+    // 🚀 Check user authentication status and load data
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is signed in, load profile data
+            const userRef = database.ref('users/' + user.uid);
+            userRef.on('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    profileUsername.textContent = userData.username || 'N/A';
+                    profileFullName.textContent = userData.fullname || 'N/A';
+                    profileReferredBy.textContent = userData.referralCode || 'N/A';
+                    profileGender.textContent = userData.gender || 'N/A';
+                    profileCountry.textContent = userData.country || 'N/A';
+                    profilePhone.textContent = userData.phone || 'N/A';
+                    profileEmail.textContent = userData.email || 'N/A';
+                    profileAddress.textContent = userData.address || 'N/A';
+                    profileZip.textContent = userData.zipcode || 'N/A';
+                }
+            }, (error) => {
+                console.error("Error loading user data:", error);
+                displayMessage("Failed to load profile data.", "error");
+            });
+        } else {
+            // No user is signed in, redirect to login page
+            window.location.href = 'index.html'; 
+        }
+    });
+
+    // New function to display messages on the page
+    function displayMessage(message, type) {
+        const messageContainer = document.getElementById('messageContainer');
+        const messageText = document.getElementById('messageText');
+        
+        messageText.textContent = message;
+        messageContainer.className = 'message-container ' + (type === 'success' ? 'message-success' : 'message-error');
+        messageContainer.style.display = 'block';
+
+        // Automatically hide the message after a few seconds
+        setTimeout(() => {
+            messageContainer.style.display = 'none';
+        }, 5000); // 5-second duration
+    }
+
+    // Password show/hide functionality
+    document.querySelectorAll('.toggle-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                button.textContent = "Hide";
+            } else {
+                passwordInput.type = "password";
+                button.textContent = "Show";
+            }
+        });
+    });
+
+    // Open profile update modal and populate fields
+    updateProfileBtn.onclick = function() {
+        modalFullName.value = profileFullName.textContent === 'N/A' ? '' : profileFullName.textContent;
+        modalPhone.value = profilePhone.textContent === 'N/A' ? '' : profilePhone.textContent;
+        modalAddress.value = profileAddress.textContent === 'N/A' ? '' : profileAddress.textContent;
+        modalZip.value = profileZip.textContent === 'N/A' ? '' : profileZip.textContent;
+        updateProfileModal.style.display = "block";
+    }
+
+    // Open change password modal
+    changePasswordBtn.onclick = function() {
+        changePasswordModal.style.display = "block";
+    }
+
+    // Close modals
+    closeBtns.forEach(btn => {
+        btn.onclick = function() {
+            updateProfileModal.style.display = "none";
+            changePasswordModal.style.display = "none";
+        }
+    });
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+        if (event.target == updateProfileModal) {
+            updateProfileModal.style.display = "none";
+        }
+        if (event.target == changePasswordModal) {
+            changePasswordModal.style.display = "none";
+        }
+    }
+
+    // 💾 Save profile data to Firebase
+    saveProfileBtn.onclick = function() {
+        const user = auth.currentUser;
+        if (user) {
+            const userId = user.uid;
+            const updates = {
+                fullname: modalFullName.value,
+                phone: modalPhone.value,
+                address: modalAddress.value,
+                zipcode: modalZip.value
+            };
+
+            database.ref('users/' + userId).update(updates)
+                .then(() => {
+                    displayMessage("Profile updated successfully!", "success");
+                    updateProfileModal.style.display = "none";
+                })
+                .catch((error) => {
+                    console.error("Error updating profile:", error);
+                    displayMessage("Failed to update profile: " + error.message, "error");
+                });
+        }
+    }
+
+    // Live password validation
+    newPasswordInput.addEventListener('input', function() {
+        const password = newPasswordInput.value;
+        lengthCheck.classList.toggle('valid', password.length >= 8);
+        numberCheck.classList.toggle('valid', /[0-9]/.test(password));
+        uppercaseCheck.classList.toggle('valid', /[A-Z]/.test(password));
+        symbolCheck.classList.toggle('valid', /[!@#$%^&*]/.test(password));
+    });
+
+    // 🔐 Update password in Firebase
+    updatePasswordBtn.onclick = function() {
+        const user = auth.currentUser;
+        if (!user) {
+            displayMessage("No user is signed in.", "error");
+            return;
+        }
+
+        const oldPassword = oldPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        const retypedPassword = retypePasswordInput.value;
+
+        // Check if all validation criteria are met
+        const isPasswordValid = lengthCheck.classList.contains('valid') &&
+                                numberCheck.classList.contains('valid') &&
+                                uppercaseCheck.classList.contains('valid') &&
+                                symbolCheck.classList.contains('valid');
+
+        if (!isPasswordValid) {
+            displayMessage("Password does not meet the requirements.", "error");
+            return;
+        }
+
+        if (newPassword !== retypedPassword) {
+            displayMessage("New passwords do not match!", "error");
+            return;
+        }
+        
+        // Re-authenticate user before updating password
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPassword);
+        user.reauthenticateWithCredential(credential)
+            .then(() => {
+                // User re-authenticated, now update the password
+                user.updatePassword(newPassword).then(() => {
+                    displayMessage("Password updated successfully!", "success");
+                    changePasswordModal.style.display = "none";
+                    oldPasswordInput.value = '';
+                    newPasswordInput.value = '';
+                    retypePasswordInput.value = '';
+                }).catch((error) => {
+                    console.error("Error updating password:", error);
+                    displayMessage("Failed to update password: " + error.message, "error");
+                });
+            })
+            .catch((error) => {
+                console.error("Error re-authenticating:", error);
+                displayMessage("Incorrect old password. Please try again.", "error");
+            });
+    }
+</script>
+
+</body>
+</html>
