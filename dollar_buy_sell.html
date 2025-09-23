@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dollar Buy/Sell</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+        }
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ddd;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin: 0 auto;
+        }
+        .header span {
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #555;
+            text-decoration: none;
+        }
+        /* Cards */
+        .card-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card.buy {
+            background-color: #e6f7ff;
+            border: 2px solid #007bff;
+        }
+        .card.sell {
+            background-color: #e6f9ed;
+            border: 2px solid #28a745;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .card-header .rate {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .card-header .label {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .card-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .card-footer {
+            text-align: right;
+            margin-top: 20px;
+        }
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .action-btn.buy {
+            background-color: #007bff;
+        }
+        .action-btn.buy:hover {
+            background-color: #0056b3;
+        }
+        .action-btn.sell {
+            background-color: #28a745;
+        }
+        .action-btn.sell:hover {
+            background-color: #218838;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-header {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        .modal-body .form-group {
+            margin-bottom: 15px;
+        }
+        .modal-body label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .modal-body input, .modal-body select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .modal-body .copy-text-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .modal-body .copy-text-container input {
+            flex: 1;
+            border: none;
+            background: transparent;
+        }
+        .modal-body .copy-btn {
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-body .warning {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .modal-body .total-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            border: 1px dashed #007bff;
+            border-radius: 5px;
+        }
+        .modal-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .modal-footer button {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        .modal-footer .note {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 15px;
+        }
+        .modal-footer .note.danger {
+            color: #dc3545;
+        }
+        /* New CSS for success message */
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="#" class="back-btn" onclick="goBack()">&#8592; Back</a>
+        <div class="header">
+            <h1>Dollar Buy/Sell</h1>
+            <span id="username-display">Welcome, User</span>
+        </div>
+        <div class="card-group">
+            <div class="card buy">
+                <div class="card-header">
+                    <span class="rate">Dollar Rate: <span id="buy-rate">...</span> BDT</span>
+                </div>
+                <div class="card-content">
+                    First Payment Delivery
+                </div>
+                <div class="card-footer">
+                    <button class="action-btn buy" onclick="openModal('buy')">Dollar Buy Now</button>
+                </div>
+            </div>
+            <div class="card sell">
+                <div class="card-header">
+                    <span class="rate">Dollar Rate: <span id="sell-rate">...</span> BDT</span>
+                </div>
+                <div class="card-content">
+                    First Payment Delivery
+                </div>
+                <div class="card-footer">
+                    <button class="action-btn sell" onclick="openModal('sell')">Dollar Sell Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="buyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('buyModal')">&times;</span>
+            <div class="modal-header">
+                <h2>Buy Dollar</h2>
+            </div>
+            <form id="buy-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Support WhatsApp No</label>
+                        <div class="copy-text-container">
+                            <input type="text" value="" readonly id="buySupportWhatsapp">
+                            <button type="button" class="copy-btn" onclick="copyToClipboard('buySupportWhatsapp')">Copy</button>
+                        </div>
+                    </div>
+                    <p>Dollar Rate: 1$ = <span id="modal-buy-rate"></span> BDT</p>
+                    <div class="form-group">
+                        <label>Dollar Received Method</label>
+                        <select id="buyReceivedMethod" required onchange="calculateBuyTotal()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="buyReceivedAccount">Dollar Received Account</label>
+                        <input type="text" id="buyReceivedAccount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="buyDollarAmount">How many dollars will you buy? (Min $5, Max $999)</label>
+                        <input type="number" id="buyDollarAmount" min="5" max="999" required oninput="calculateBuyTotal()">
+                    </div>
+                    <p>Fee: <span id="buyFeeDisplay">0</span> BDT</p>
+                    <div class="total-display">
+                        Total Payment: <span id="buyTotalBDT">0</span> BDT
+                    </div>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="buyPaymentMethod" onchange="loadPaymentDetails('buy')" required></select>
+                    </div>
+                    <div id="buyPaymentDetails"></div>
+                    <p class="warning">
+                        You must send money to this number. We are not responsible for wrong payments.
+                    </p>
+                    <div class="form-group">
+                        <label for="buyTnxId">Transaction ID (TnxID)</label>
+                        <input type="text" id="buyTnxId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="buyUserWhatsapp">Your WhatsApp No</label>
+                        <input type="tel" id="buyUserWhatsapp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="buyUsername" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="confirmTransaction('buy')">Confirm Buy</button>
+                    <p class="note">After confirming, take a screenshot of your payment. Send the screenshot and your username to our support WhatsApp. Payment will be cleared within 5-10 minutes.</p>
+                </div>
+            </form>
+            <div id="buySuccessMessage" class="success-message">
+                Submit successful! We will process your request shortly.
+            </div>
+        </div>
+    </div>
+    <div id="sellModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('sellModal')">&times;</span>
+            <div class="modal-header">
+                <h2>Sell Dollar</h2>
+            </div>
+            <form id="sell-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Support WhatsApp No</label>
+                        <div class="copy-text-container">
+                            <input type="text" value="" readonly id="sellSupportWhatsapp">
+                            <button type="button" class="copy-btn" onclick="copyToClipboard('sellSupportWhatsapp')">Copy</button>
+                        </div>
+                    </div>
+                    <p>Dollar Rate: 1$ = <span id="modal-sell-rate"></span> BDT</p>
+                    <div class="form-group">
+                        <label>Received Method</label>
+                        <select id="sellReceivedMethod" onchange="calculateSellTotal()" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellReceivedAccount">BDT Received Account No</label>
+                        <input type="text" id="sellReceivedAccount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellDollarAmount">How many dollars will you sell? (Min $5, Max $999)</label>
+                        <input type="number" id="sellDollarAmount" min="5" max="999" required oninput="calculateSellTotal()">
+                    </div>
+                    <p>Fee: <span id="sellFeeDisplay">0</span> BDT</p>
+                    <div class="total-display">
+                        Total Receive: <span id="sellTotalBDT">0</span> BDT
+                    </div>
+                    <div class="form-group">
+                        <label>Dollar Send Method</label>
+                        <select id="sellSendMethod" onchange="loadPaymentDetails('sell')" required></select>
+                    </div>
+                    <div id="sellPaymentDetails"></div>
+                    <p class="warning">
+                        You must send dollars to this account. We are not responsible for sending to the wrong account.
+                    </p>
+                    <div class="form-group">
+                        <label for="sellTnxId">Transaction ID (TnxId)</label>
+                        <input type="text" id="sellTnxId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sellUserWhatsapp">Your WhatsApp No</label>
+                        <input type="tel" id="sellUserWhatsapp" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="sellUsername" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="confirmTransaction('sell')">Confirm Sell</button>
+                    <p class="note">After confirming, take a screenshot of your dollar transaction. Send the screenshot and your username to our support WhatsApp. Payment will be cleared within 5-10 minutes.</p>
+                </div>
+            </form>
+            <div id="sellSuccessMessage" class="success-message">
+                Submit successful! We will process your request shortly.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+            authDomain: "exsurvey-1c78a.firebaseapp.com",
+            databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+            projectId: "exsurvey-1c78a",
+            storageBucket: "exsurvey-1c78a.firebasestorage.app",
+            messagingSenderId: "754959615386",
+            appId: "1:754959615386:web:65c390db232a7dafd3e623",
+            measurementId: "G-8SQNS2DLBT"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+        const usernameDisplay = document.getElementById('username-display');
+        const buyRateDisplay = document.getElementById('buy-rate');
+        const sellRateDisplay = document.getElementById('sell-rate');
+        const modalBuyRate = document.getElementById('modal-buy-rate');
+        const modalSellRate = document.getElementById('modal-sell-rate');
+        const buyDollarAmountInput = document.getElementById('buyDollarAmount');
+        const buyTotalBDT = document.getElementById('buyTotalBDT');
+        const sellDollarAmountInput = document.getElementById('sellDollarAmount');
+        const sellTotalBDT = document.getElementById('sellTotalBDT');
+        const buyPaymentMethod = document.getElementById('buyPaymentMethod');
+        const sellReceivedMethod = document.getElementById('sellReceivedMethod');
+        const sellSendMethod = document.getElementById('sellSendMethod');
+        const buyReceivedMethod = document.getElementById('buyReceivedMethod');
+        const buyFeeDisplay = document.getElementById('buyFeeDisplay');
+        const sellFeeDisplay = document.getElementById('sellFeeDisplay');
+        const buySupportWhatsappInput = document.getElementById('buySupportWhatsapp');
+        const sellSupportWhatsappInput = document.getElementById('sellSupportWhatsapp');
+        
+        let currentUserId = null;
+        let currentUsername = 'User';
+        let buyRate = 0;
+        let sellRate = 0;
+        let paymentMethods = {};
+        let receivedMethods = {};
+        function goBack() {
+            window.history.back();
+        }
+        function openModal(type) {
+            if (!currentUserId) {
+                alert('Please log in to make a request.');
+                return;
+            }
+            if (type === 'buy') {
+                document.getElementById('buyModal').style.display = 'block';
+            } else if (type === 'sell') {
+                document.getElementById('sellModal').style.display = 'block';
+            }
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            const formToReset = (modalId === 'buyModal') ? document.getElementById('buy-form') : document.getElementById('sell-form');
+            if (formToReset) {
+                formToReset.reset();
+            }
+        }
+        function copyToClipboard(elementId) {
+            const copyText = document.getElementById(elementId);
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("Copied: " + copyText.value);
+        }
+        function confirmTransaction(type) {
+            if (!currentUserId) {
+                alert('You must be logged in to confirm a transaction.');
+                return;
+            }
+            let requestData;
+            if (type === 'buy') {
+                const form = document.getElementById('buy-form');
+                if (!form.reportValidity()) return;
+                const amount = parseFloat(buyDollarAmountInput.value);
+                const total = parseFloat(buyTotalBDT.textContent);
+                const whatsappNo = document.getElementById('buyUserWhatsapp').value;
+                const tnxId = document.getElementById('buyTnxId').value;
+                const selectedPaymentName = buyPaymentMethod.value;
+                const selectedReceivedName = buyReceivedMethod.value;
+                const receivedAccount = document.getElementById('buyReceivedAccount').value;
+                const receivedMethod = Object.values(receivedMethods).find(m => m.name === selectedReceivedName);
+                const fee = parseFloat(buyFeeDisplay.textContent);
+                const feeType = receivedMethod ? receivedMethod.feeType : 'N/A';
+                requestData = {
+                    type: 'buy',
+                    userId: currentUserId,
+                    username: currentUsername,
+                    whatsappNo,
+                    dollarAmount: amount,
+                    totalBDT: total,
+                    tnxId,
+                    paymentMethod: selectedPaymentName,
+                    receivedMethod: selectedReceivedName,
+                    receivedAccount,
+                    fee: fee,
+                    feeType: feeType,
+                    status: 'Pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+            } else if (type === 'sell') {
+                const form = document.getElementById('sell-form');
+                if (!form.reportValidity()) return;
+                const amount = parseFloat(sellDollarAmountInput.value);
+                const total = parseFloat(sellTotalBDT.textContent);
+                const whatsappNo = document.getElementById('sellUserWhatsapp').value;
+                const tnxId = document.getElementById('sellTnxId').value;
+                const selectedSendName = sellSendMethod.value;
+                const selectedReceivedName = sellReceivedMethod.value;
+                const receivedAccount = document.getElementById('sellReceivedAccount').value;
+                const receivedMethod = Object.values(paymentMethods).find(m => m.name === selectedReceivedName);
+                const fee = parseFloat(sellFeeDisplay.textContent);
+                const feeType = receivedMethod ? receivedMethod.feeType : 'N/A';
+                requestData = {
+                    type: 'sell',
+                    userId: currentUserId,
+                    username: currentUsername,
+                    whatsappNo,
+                    dollarAmount: amount,
+                    totalBDT: total,
+                    tnxId,
+                    sendMethod: selectedSendName,
+                    receivedMethod: selectedReceivedName,
+                    receivedAccount,
+                    fee: fee,
+                    feeType: feeType,
+                    status: 'Pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+            }
+            database.ref('dollar_buy_sell_request_history').push(requestData)
+                .then(() => {
+                    const modalId = type === 'buy' ? 'buyModal' : 'sellModal';
+                    const successMessageId = type === 'buy' ? 'buySuccessMessage' : 'sellSuccessMessage';
+                    document.getElementById(successMessageId).style.display = 'block';
+                    document.getElementById(modalId).querySelector('form').style.display = 'none';
+                    setTimeout(() => {
+                        closeModal(modalId);
+                        document.getElementById(modalId).querySelector('form').style.display = 'block';
+                        document.getElementById(successMessageId).style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    alert('Error confirming transaction: ' + error.message);
+                });
+        }
+        function loadPaymentDetails(type) {
+            const methodSelect = (type === 'buy') ? buyPaymentMethod : sellSendMethod;
+            const detailsContainer = (type === 'buy') ? document.getElementById('buyPaymentDetails') : document.getElementById('sellPaymentDetails');
+            const selectedMethodName = methodSelect.value;
+            detailsContainer.innerHTML = '';
+            if (!selectedMethodName) return;
+            const methods = (type === 'buy') ? paymentMethods : receivedMethods;
+            const method = Object.values(methods).find(m => m.name === selectedMethodName);
+            if (method) {
+                detailsContainer.innerHTML = `
+                    <div class="form-group">
+                        <label>${method.name} ${type === 'buy' ? 'Number' : 'Account'}</label>
+                        <div class="copy-text-container">
+                            <input type="text" value="${method.account}" readonly id="${type}PaymentAcc">
+                            <button type="button" class="copy-btn" onclick="copyToClipboard('${type}PaymentAcc')">Copy</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        function calculateBuyTotal() {
+            const amount = parseFloat(buyDollarAmountInput.value);
+            const receivedMethodName = buyReceivedMethod.value;
+            if (isNaN(amount) || amount < 5 || amount > 999 || !receivedMethodName) {
+                buyTotalBDT.textContent = '0';
+                buyFeeDisplay.textContent = '0';
+                return;
+            }
+            const receivedMethod = Object.values(receivedMethods).find(m => m.name === receivedMethodName);
+            if (!receivedMethod) {
+                buyTotalBDT.textContent = '0';
+                buyFeeDisplay.textContent = '0';
+                return;
+            }
+            let fee = 0;
+            if (receivedMethod.feeType === 'percent') {
+                fee = (amount * buyRate) * (receivedMethod.feeAmount / 100);
+            } else {
+                fee = receivedMethod.feeAmount;
+            }
+            const total = (amount * buyRate) + fee;
+            buyFeeDisplay.textContent = fee.toFixed(2);
+            buyTotalBDT.textContent = total.toFixed(2);
+        }
+        function calculateSellTotal() {
+            const amount = parseFloat(sellDollarAmountInput.value);
+            const receivedMethodName = sellReceivedMethod.value;
+            if (isNaN(amount) || amount < 5 || amount > 999 || !receivedMethodName) {
+                sellTotalBDT.textContent = '0';
+                sellFeeDisplay.textContent = '0';
+                return;
+            }
+            const receivedMethod = Object.values(paymentMethods).find(m => m.name === receivedMethodName);
+            if (!receivedMethod) {
+                sellTotalBDT.textContent = '0';
+                sellFeeDisplay.textContent = '0';
+                return;
+            }
+            let fee = 0;
+            if (receivedMethod.feeType === 'percent') {
+                fee = (amount * sellRate) * (receivedMethod.feeAmount / 100);
+            } else {
+                fee = receivedMethod.feeAmount;
+            }
+            const total = (amount * sellRate) - fee;
+            sellFeeDisplay.textContent = fee.toFixed(2);
+            sellTotalBDT.textContent = total.toFixed(2);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            Promise.all([
+                database.ref('update_all_rates/dollar_buy_rate').once('value'),
+                database.ref('update_all_rates/dollar_sell_rate').once('value'),
+                database.ref('methods/payment').once('value'),
+                database.ref('methods/dollar_received').once('value'),
+                database.ref('support/whatsapp').once('value')
+            ]).then(snapshots => {
+                const buyRateSnapshot = snapshots[0];
+                const sellRateSnapshot = snapshots[1];
+                const paymentMethodsSnapshot = snapshots[2];
+                const receivedMethodsSnapshot = snapshots[3];
+                const whatsappSnapshot = snapshots[4];
+                buyRate = buyRateSnapshot.val() || 0;
+                sellRate = sellRateSnapshot.val() || 0;
+                const supportWhatsapp = whatsappSnapshot.val() || 'N/A';
+                buyRateDisplay.textContent = buyRate.toFixed(2);
+                modalBuyRate.textContent = buyRate.toFixed(2);
+                sellRateDisplay.textContent = sellRate.toFixed(2);
+                modalSellRate.textContent = sellRate.toFixed(2);
+                buySupportWhatsappInput.value = supportWhatsapp;
+                sellSupportWhatsappInput.value = supportWhatsapp;
+                paymentMethods = paymentMethodsSnapshot.val() || {};
+                buyPaymentMethod.innerHTML = '<option value="">Select Method</option>';
+                sellReceivedMethod.innerHTML = '<option value="">Select Method</option>';
+                if (paymentMethods) {
+                    Object.values(paymentMethods).forEach(method => {
+                        buyPaymentMethod.innerHTML += `<option value="${method.name}">${method.name}</option>`;
+                        sellReceivedMethod.innerHTML += `<option value="${method.name}">${method.name}</option>`;
+                    });
+                }
+                receivedMethods = receivedMethodsSnapshot.val() || {};
+                sellSendMethod.innerHTML = '<option value="">Select Method</option>';
+                buyReceivedMethod.innerHTML = '<option value="">Select Method</option>';
+                if (receivedMethods) {
+                    Object.values(receivedMethods).forEach(method => {
+                        sellSendMethod.innerHTML += `<option value="${method.name}">${method.name}</option>`;
+                        buyReceivedMethod.innerHTML += `<option value="${method.name}">${method.name}</option>`;
+                    });
+                }
+            }).catch(error => {
+                console.error("Error loading data from Firebase:", error);
+            });
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUserId = user.uid;
+                    database.ref('users/' + currentUserId).once('value', (snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData && userData.username) {
+                            currentUsername = userData.username;
+                            usernameDisplay.textContent = `Welcome, ${currentUsername}`;
+                            document.getElementById('buyUsername').value = currentUsername;
+                            document.getElementById('sellUsername').value = currentUsername;
+                        }
+                    });
+                } else {
+                    usernameDisplay.textContent = 'Welcome, Guest';
+                    document.getElementById('buyUsername').value = 'Please log in';
+                    document.getElementById('sellUsername').value = 'Please log in';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
