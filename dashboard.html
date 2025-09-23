@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ExSurvey</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e0e0e0;
+            position: relative;
+            z-index: 1000;
+        }
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .header-left {
+            width: 120px;
+            justify-content: flex-start;
+        }
+        .header-right {
+            width: 120px;
+            justify-content: flex-end;
+            position: relative;
+        }
+        .header-center {
+            flex-grow: 1;
+            text-align: center;
+        }
+        .balance-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .balance-container h3 {
+            margin: 0 5px 0 0;
+            font-size: 16px;
+            color: #555;
+        }
+        .balance-container p {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            transition: all 0.3s ease;
+        }
+        .balance-container p.hidden {
+            color: transparent;
+            text-shadow: 0 0 10px #000;
+        }
+        .balance-container .hide-icon {
+            font-size: 16px;
+            margin-left: 5px;
+            color: #007bff;
+        }
+        .menu-icon, .header-icon {
+            font-size: 24px;
+            color: #555;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+        .header-icon:hover, .menu-icon:hover {
+            color: #007bff;
+        }
+        .header-icon:not(:last-child) {
+            margin-right: 15px;
+        }
+        .user-greeting {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-left: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1001;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+        .closebtn-container {
+            width: 100%;
+            height: 60px; /* To prevent overlapping with sidebar content */
+            position: relative;
+            padding: 10px 25px;
+            box-sizing: border-box;
+            text-align: right;
+        }
+        .sidebar .closebtn {
+            font-size: 45px; /* Increased font size for better visibility */
+            color: #fff; /* Changed color to white to stand out */
+            cursor: pointer;
+            z-index: 1002; /* Ensures it is on top of other elements */
+            text-shadow: 1px 1px 2px #000; /* Adds a slight shadow for more visibility */
+            display: inline-block;
+        }
+        .sidebar a, .sidebar .dropdown-btn {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            outline: none;
+        }
+        .sidebar a:hover, .sidebar .dropdown-btn:hover {
+            color: #f1f1f1;
+            background-color: #282828;
+        }
+        .sidebar .dropdown-container {
+            display: none;
+            background-color: #262626;
+            padding-left: 20px;
+        }
+        .sidebar .dropdown-container a {
+            padding: 10px 20px;
+            color: #ddd;
+            font-size: 16px;
+        }
+        .sidebar .fa-caret-down {
+            float: right;
+            padding-right: 8px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+        .service-card {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .service-card h2, .service-card h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .service-card p, .service-card ul {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .service-card ul {
+            padding-left: 20px;
+            list-style: none;
+        }
+        .service-card ul li {
+            margin-bottom: 8px;
+        }
+        .service-card .title-icon {
+            margin-right: 8px;
+            color: #007bff;
+        }
+        .service-card .list-icon {
+            margin-right: 8px;
+            color: #28a745;
+        }
+        .service-card hr {
+            border: 0;
+            height: 1px;
+            background: #e0e0e0;
+            margin: 20px 0;
+        }
+        
+        /* Profile Dropdown */
+        .profile-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            top: 60px;
+            right: 0;
+            border-radius: 5px;
+        }
+        .profile-dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        .profile-dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
+        /* Notification Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #000;
+            text-decoration: none;
+        }
+        .notification-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            text-align: left;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        /* Notification Badge Styles */
+        .notification-container {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 18px;
+            width: 18px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px;
+            transform: translate(50%, -50%);
+            z-index: 1;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #333;
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: auto;
+        }
+        .footer-image img {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .footer-content {
+            margin-bottom: 20px;
+        }
+        .footer-content h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .footer-content p {
+            margin: 5px 0;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .footer-links li {
+            margin: 10px 0;
+        }
+        .footer-links a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-links a:hover {
+            color: #007bff;
+        }
+        .social-icons {
+            margin-top: 20px;
+        }
+        .social-icons a {
+            color: #fff;
+            font-size: 24px;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .social-icons a:hover {
+            color: #007bff;
+        }
+        .copyright {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #bbb;
+        }
+        /* New CSS for the success message container */
+        .message-container {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px auto;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            display: none; /* Initially hidden */
+            max-width: 600px;
+        }
+
+        .success-message {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mySidebar" class="sidebar">
+        <div class="closebtn-container">
+            <span class="closebtn" onclick="closeNav()">&times;</span>
+        </div>
+        <button class="dropdown-btn">
+            Find Work
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div class="dropdown-container">
+            <a href="job.html">Jobs</a>
+            <a href="dollar_buy_sell.html">Dollar Buy/Sell</a>
+            <a href="social_buy_sell_button_page.html">Social Account Buy/Sell</a>
+            <a href="recharge.html">Mobile Recharge</a>
+            <a href="topup.html">TopUp</a>
+        </div>
+        <a href="deposit.html">Deposit</a>
+        <a href="withdraw.html">Withdraw</a>
+        <a href="deposit_withdraw_history.html">Deposit/Withdraw History</a>
+          <a href="topup_history.html">TopUp History</a>
+        <a href="recharge_history.html">Recharge History</a>
+        <a href="social_buy_sell_history.html">Social Account Buy/Sell History</a>
+        <a href="dollar_buy_sell_history.html">Dollar Buy/Sell History</a>
+        <a href="jobs_history.html">Jobs History</a>
+    </div>
+
+    <header class="header">
+        <div class="header-left">
+            <i class="fas fa-bars menu-icon" onclick="openNav()"></i>
+            <div class="balance-container" id="balanceToggle">
+                <p id="balanceText" class="hidden">0.00 $</p>
+                <i class="fas fa-eye hide-icon" id="hideIcon"></i>
+            </div>
+        </div>
+        <div class="header-center">
+            <span class="user-greeting" id="userGreeting"></span>
+        </div>
+        <div class="header-right">
+            <div class="notification-container">
+                <i class="fas fa-bell header-icon" id="notificationIcon"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+            </div>
+            <i class="fas fa-user-circle header-icon profile-icon" id="profileIcon"></i>
+            <div class="profile-dropdown-content" id="profileDropdown">
+                <a href="profile.html">My Profile</a>
+                <a href="https://wa.me/+8801792849799" target="_blank">Contact Us (WhatsApp)</a>
+                <a href="https://www.facebook.com/profile.php?id=61580025557448" target="_blank">Join FB Page</a>
+                <a href="#" id="logoutBtn">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <div id="logoutMessageContainer" class="message-container">
+        <p id="logoutMessage" class="success-message"></p>
+    </div>
+
+    <main class="main-content">
+        <div class="service-card">
+            <h2><i class="fas fa-building title-icon"></i> ExSurvey Our Service</h2>
+            <h3><i class="fas fa-thumbtack title-icon"></i> কাজের ধরন:</h3>
+            <ul>
+                <li><i class="fas fa-check-circle list-icon"></i> **Micro Jobs** – ছোট ছোট অনলাইন কাজ করে আয়ের সুযোগ। যেমন: সার্ভে পূরণ, অ্যাপ ইনস্টল, লাইক/ফলো ইত্যাদি।</li>
+                <li><i class="fas fa-check-circle list-icon"></i> **Social Account Buy/Sell** – নিরাপদভাবে সোশ্যাল মিডিয়া অ্যাকাউন্ট কেনা-বেচা।</li>
+                <li><i class="fas fa-check-circle list-icon"></i> **Dollar Buy/Sell** – ফ্রিল্যান্স ইনকাম বা আন্তর্জাতিক লেনদেনের জন্য ডলার কেনা-বেচার সুবিধা।</li>
+                <li><i class="fas fa-check-circle list-icon"></i> **Mobile Recharge** – যেকোনো অপারেটরে দ্রুত মোবাইল রিচার্জ।</li>
+            </ul>
+            <hr>
+            <h3><i class="fas fa-check-double title-icon"></i> সুবিধাসমূহ:</h3>
+            <ul>
+                <li><i class="fas fa-check-circle list-icon"></i> সহজ ও ইউজার ফ্রেন্ডলি ড্যাশবোর্ড</li>
+                <li><i class="fas fa-check-circle list-icon"></i> দ্রুত এবং নির্ভরযোগ্য পেমেন্ট</li>
+                <li><i class="fas fa-check-circle list-icon"></i> নিরাপদ Buy/Sell সিস্টেম</li>
+                <li><i class="fas fa-check-circle list-icon"></i> ২৪/৭ কাস্টমার সাপোর্ট</li>
+            </ul>
+            <hr>
+            <h2><i class="fas fa-building title-icon"></i> ExSurvey Our Service</h2>
+            <h3><i class="fas fa-thumbtack title-icon"></i> Services:</h3>
+            <ul>
+                <li><i class="fas fa-check-circle list-icon"></i> **Micro Jobs** – Earn money by completing small online tasks. Examples: filling surveys, installing apps, likes/follows, etc.</li>
+                <li><i class="fas fa-check-circle list-icon"></i> **Social Account Buy/Sell** – Safe marketplace for buying and selling social media accounts.</li>
+                <li><i class="fas class="fas fa-check-circle list-icon"></i> **Dollar Buy/Sell** – Secure transactions for freelancers and international payments.</li>
+                <li><i class="fas fa-check-circle list-icon"></i> **Mobile Recharge** – Fast and easy mobile recharge to any operator.</li>
+            </ul>
+            <hr>
+            <h3><i class="fas fa-check-double title-icon"></i> Benefits:</h3>
+            <ul>
+                <li><i class="fas fa-check-circle list-icon"></i> Simple and user-friendly dashboard</li>
+                <li><i class="fas fa-check-circle list-icon"></i> Fast & reliable payment system</li>
+                <li><i class="fas fa-check-circle list-icon"></i> Safe and secure Buy/Sell transactions</li>
+                <li><i class="fas fa-check-circle list-icon"></i> 24/7 customer support</li>
+            </ul>
+        </div>
+
+        <div class="service-card">
+            <h2>Referral Programme</h2>
+            <p><strong>Referral Bonus:</strong> 0.20 USD. To claim the bonus, the invitee must complete tasks worth 10 USD. <a href="reffer.html">Read More</a></p>
+            <p>The invitee must sign up with all correct information; otherwise, the account will be banned.</p>
+            <p>Users will not receive payment if they create more than one account. Only one account per device is allowed.</p>
+            <hr>
+            <h2>রেফারেল প্রোগ্রাম</h2>
+            <p><strong>রেফারেল বোনাস:</strong> ০.২০ ডলার। বোনাস পেতে হলে আমন্ত্রিত ব্যক্তিকে ১০ ডলারের কাজ সম্পন্ন করতে হবে। <a href="refferal.html">বিস্তারিত </a></p>
+            <p>আমন্ত্রিত ব্যক্তিকে অবশ্যই সকল সঠিক তথ্য দিয়ে অ্যাকাউন্ট সাইন আপ করতে হবে, অন্যথায় অ্যাকাউন্টটি নিষিদ্ধ করা হবে।</p>
+            <p>একজন ব্যবহারকারী একাধিক অ্যাকাউন্ট তৈরি করলে পেমেন্ট পাবেন না। একটি ডিভাইসে শুধুমাত্র একটি অ্যাকাউন্ট ব্যবহার করা যাবে।</p>
+        </div>
+    </main>
+
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Notifications</h2>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body" id="notificationContent">
+                <p>Loading notifications...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-image">
+             <img src="https://via.placeholder.com/150x150.png?text=Contact+Icon" alt="Contact Icon">
+        </div>
+        <div class="footer-content">
+            <h3>Contact Us Now</h3>
+            <p>Email: <a href="mailto:support@exsurvey.com" style="color: #fff; text-decoration: none;">support@exsurvey.com</a></p>
+            <p><a href="mailto:exsurveyteam@gmail.com" style="color: #fff; text-decoration: none;">Leave a message</a></p>
+        </div>
+        <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="about.html">About Us</a></li>
+        </ul>
+        <div class="social-icons">
+            <p>Social:</p>
+            <a href="https://www.youtube.com/@ExSurvey" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61580025557448" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://chat.whatsapp.com/KDm94eBzNHMHwJY04raNqA" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="copyright">
+            <p>© 2025 ExSurvey. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+          authDomain: "exsurvey-1c78a.firebaseapp.com",
+          databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+          projectId: "exsurvey-1c78a",
+          storageBucket: "exsurvey-1c78a.firebasestorage.app",
+          messagingSenderId: "754959615386",
+          appId: "1:754959615386:web:65c390db232a7dafd3e623",
+          measurementId: "G-8SQNS2DLBT"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        const userGreetingElement = document.getElementById('userGreeting');
+        const balanceTextElement = document.getElementById('balanceText');
+        const notificationContentElement = document.getElementById('notificationContent');
+        const notificationBadge = document.getElementById('notificationBadge');
+
+        // Check for authenticated user and load data
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in. Load their data.
+                const userRef = database.ref('users/' + user.uid);
+                userRef.once('value', snapshot => {
+                    const userData = snapshot.val();
+                    if (userData) {
+                        userGreetingElement.textContent = `${userData.username}`;
+                        const userBalance = userData.balance ? userData.balance.toFixed(2) : '0.00';
+                        balanceTextElement.textContent = `${userBalance} $`;
+                        balanceTextElement.classList.remove('hidden');
+                    }
+                }).catch(error => {
+                    console.error("Error loading user data:", error);
+                    alert("Error loading user data.");
+                });
+
+                // Listen for unread notifications for the current user
+                const unreadNotificationsRef = database.ref('users/' + user.uid + '/notifications').orderByChild('read').equalTo(false);
+                unreadNotificationsRef.on('value', snapshot => {
+                    const unreadCount = snapshot.numChildren();
+                    if (unreadCount > 0) {
+                        notificationBadge.textContent = unreadCount;
+                        notificationBadge.style.display = 'flex';
+                    } else {
+                        notificationBadge.style.display = 'none';
+                    }
+                });
+
+            } else {
+                // User is not signed in, redirect to login page.
+                window.location.href = 'login.html';
+            }
+        });
+        
+        // Corrected Logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutMessageContainer = document.getElementById('logoutMessageContainer');
+        const logoutMessage = document.getElementById('logoutMessage');
+
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            auth.signOut().then(() => {
+                // Remove the alert and display a message on the page instead
+                logoutMessage.textContent = "Logged out successfully.";
+                logoutMessageContainer.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000); // 2-second delay before redirecting
+            }).catch((error) => {
+                alert("Error logging out: " + error.message);
+            });
+        });
+
+
+        // Hamburger Menu functionality
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+        }
+
+        // Dropdown functionality
+        var dropdown = document.getElementsByClassName("dropdown-btn");
+        for (let i = 0; i < dropdown.length; i++) {
+            dropdown[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var dropdownContent = this.nextElementSibling;
+                if (dropdownContent.style.display === "block") {
+                    dropdownContent.style.display = "none";
+                } else {
+                    dropdownContent.style.display = "block";
+                }
+            });
+        }
+        
+        // Balance hide/show functionality
+        const balanceToggle = document.getElementById('balanceToggle');
+        const hideIcon = document.getElementById('hideIcon');
+        
+        balanceToggle.addEventListener('click', () => {
+            balanceTextElement.classList.toggle('hidden');
+            hideIcon.classList.toggle('fa-eye');
+            hideIcon.classList.toggle('fa-eye-slash');
+        });
+
+        // Profile Dropdown
+        const profileIcon = document.getElementById('profileIcon');
+        const profileDropdown = document.getElementById('profileDropdown');
+        profileIcon.addEventListener('click', (event) => {
+            event.stopPropagation();
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (!profileIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
+                profileDropdown.style.display = 'none';
+            }
+        });
+
+        // Notification Modal with 'Read' functionality
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationModal = document.getElementById('notificationModal');
+        const closeModal = document.getElementById('closeModal');
+
+        notificationIcon.addEventListener('click', () => {
+            notificationModal.style.display = 'flex';
+            if (auth.currentUser) {
+                const notificationsRef = database.ref('users/' + auth.currentUser.uid + '/notifications').orderByChild('timestamp').limitToLast(10);
+                notificationsRef.once('value', snapshot => {
+                    const updates = {};
+                    notificationContentElement.innerHTML = ''; // Clear previous notifications
+                    if (snapshot.exists()) {
+                        snapshot.forEach(childSnapshot => {
+                            const notification = childSnapshot.val();
+                            const notificationId = childSnapshot.key;
+                            
+                            // Mark as read in the database
+                            updates[notificationId + '/read'] = true;
+                            
+                            const notificationItem = document.createElement('div');
+                            notificationItem.className = 'notification-item';
+                            notificationItem.innerHTML = `<p><strong>${notification.title}</strong></p><p>${notification.message}</p>`;
+                            notificationContentElement.appendChild(notificationItem);
+                        });
+                        // Update all notifications as read in a single batch
+                        database.ref('users/' + auth.currentUser.uid + '/notifications').update(updates);
+                    } else {
+                        notificationContentElement.innerHTML = '<p>No new notifications at this time.</p>';
+                    }
+                }, error => {
+                    console.error("Error fetching notifications:", error);
+                    notificationContentElement.innerHTML = '<p>Error loading notifications.</p>';
+                });
+            }
+        });
+
+        closeModal.addEventListener('click', () => {
+            notificationModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === notificationModal) {
+                notificationModal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
