@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Accounts</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px; /* Added spacing below buttons */
+        }
+        .btn {
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .buy-btn {
+            background-color: #007bff;
+        }
+        .buy-btn:hover {
+            background-color: #0056b3;
+        }
+        .sell-btn {
+            background-color: #28a745;
+        }
+        .sell-btn:hover {
+            background-color: #218838;
+        }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+        .instruction-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e2e6ea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .instruction-box p {
+            margin: 0 0 10px 0;
+            line-height: 1.6;
+            color: #555;
+        }
+        .instruction-box p:last-child {
+            margin-bottom: 0;
+        }
+        .instruction-box strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+    <div class="container">
+        <h1>What do you want to do?</h1>
+        <div class="btn-group">
+            <a href="social_account_buy.html" class="btn buy-btn">Buy Accounts</a>
+            <a href="social_account_sell.html" class="btn sell-btn">Sell Accounts</a>
+        </div>
+
+        <div class="instruction-box">
+            <p><strong>বাংলায়:</strong></p>
+            <p>আপনার সোশ্যাল অ্যাকাউন্ট কেনাবেচার জন্য সঠিক বাটনে চাপুন।</p>
+            <p>• যদি আপনি অ্যাকাউন্ট কিনতে চান, তাহলে "Buy Accounts" বাটনে চাপুন।</p>
+            <p>• যদি আপনি অ্যাকাউন্ট বিক্রি করতে চান, তাহলে "Sell Accounts" বাটনে চাপুন।</p>
+            <hr>
+            <p><strong>In English:</strong></p>
+            <p>To buy or sell your social media accounts, press the correct button below.</p>
+            <p>• If you want to **buy** an account, click the "Buy Accounts" button.</p>
+            <p>• If you want to **sell** an account, click the "Sell Accounts" button.</p>
+        </div>
+    </div>
+</body>
+</html>
