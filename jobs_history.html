@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Job Submissions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        /* Header Styles */
+        .header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #555;
+            cursor: pointer;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .main-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .submission-item {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .submission-info {
+            flex-grow: 1;
+        }
+        .submission-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #007bff;
+        }
+        .submission-info p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .status-badge {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+        <h1>My Jobs History</h1>
+    </div>
+
+    <div class="main-container">
+        <div id="submissions-list">
+            <p class="loading">Loading your job history...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, get, child, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+          apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+          authDomain: "exsurvey-1c78a.firebaseapp.com",
+          databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+          projectId: "exsurvey-1c78a",
+          storageBucket: "exsurvey-1c78a.firebasestorage.app",
+          messagingSenderId: "754959615386",
+          appId: "1:754959615386:web:65c390db232a7dafd3e623",
+          measurementId: "G-8SQNS2DLBT"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        const submissionsListDiv = document.getElementById('submissions-list');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userId = user.uid;
+                loadSubmissions(userId);
+            } else {
+                submissionsListDiv.innerHTML = '<p style="text-align: center; color: red;">Please log in to view your submissions.</p>';
+            }
+        });
+
+        const loadSubmissions = (currentUserId) => {
+            const submissionsQuery = query(ref(database, 'job_history'), orderByChild('userId'), equalTo(currentUserId));
+            
+            onValue(submissionsQuery, (snapshot) => {
+                submissionsListDiv.innerHTML = '';
+                if (snapshot.exists()) {
+                    let userSubmissions = [];
+                    snapshot.forEach(childSnapshot => {
+                        userSubmissions.push(childSnapshot.val());
+                    });
+                    
+                    // Sort by submission timestamp in descending order (newest first)
+                    userSubmissions.sort((a, b) => {
+                        const dateA = new Date(a.timestamp);
+                        const dateB = new Date(b.timestamp);
+                        return dateB - dateA;
+                    });
+                    
+                    // Limit to the last 20 submissions
+                    const recentSubmissions = userSubmissions.slice(0, 10);
+
+                    if (recentSubmissions.length === 0) {
+                        submissionsListDiv.innerHTML = '<p style="text-align: center;">You have not submitted any jobs yet.</p>';
+                        return;
+                    }
+
+                    get(ref(database, 'jobs')).then((jobsSnapshot) => {
+                        const jobs = jobsSnapshot.val() || {};
+                        
+                        recentSubmissions.forEach(submission => {
+                            const job = jobs[submission.jobId] || {};
+                            const submissionItem = document.createElement('div');
+                            submissionItem.className = 'submission-item';
+                            
+                            const statusClass = submission.status && submission.status.toLowerCase() === 'approved' ? 'status-approved' : 
+                                                submission.status && submission.status.toLowerCase() === 'rejected' ? 'status-rejected' : 'status-pending';
+                            
+                            // Format the timestamp to a readable date and time
+                            const submissionDate = submission.timestamp ? new Date(submission.timestamp).toLocaleString() : 'N/A';
+                            const amount = typeof submission.amount === 'number' ? `$${submission.amount.toFixed(2)}` : 'N/A';
+                            
+                            submissionItem.innerHTML = `
+                                <div class="submission-info">
+                                    <h4>Job Title: ${job.title || 'N/A'}</h4>
+                                    <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${submission.status || 'Pending'}</span></p>
+                                    <p><strong>Amount:</strong> ${amount}</p>
+                                    <p><strong>Submission:</strong> ${submission.submission || 'N/A'}</p>
+                                    <p><strong>Submitted On:</strong> ${submissionDate}</p>
+                                </div>
+                            `;
+                            submissionsListDiv.appendChild(submissionItem);
+                        });
+                    }).catch(error => {
+                        submissionsListDiv.innerHTML = '<p style="text-align: center; color: red;">Error loading job details. Please try again.</p>';
+                        console.error("Error fetching jobs:", error);
+                    });
+                } else {
+                    submissionsListDiv.innerHTML = '<p style="text-align: center;">No job submissions found.</p>';
+                }
+            });
+        };
+    </script>
+</body>
+</html>
