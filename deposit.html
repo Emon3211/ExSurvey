@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 26px;
+            color: #333;
+            margin: 0 auto;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #555;
+            text-decoration: none;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .deposit-account-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #deposit-account-info {
+            flex-grow: 1;
+            background-color: #f8f9fa;
+        }
+        .copy-btn {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #e9e9e9;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .copy-btn:hover {
+            background-color: #ddd;
+        }
+        .btn-deposit {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .btn-deposit:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .info-payment {
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #0056b3;
+        }
+    </style>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a href="#" class="back-btn" onclick="goBack()">&#8592;</a>
+        <h1>Deposit</h1>
+    </div>
+
+    <form id="depositForm">
+        <div class="form-group">
+            <label for="depositMethod">Select Method</label>
+            <select id="depositMethod" required>
+                <option value="">Loading methods...</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="deposit-account-group" style="display: none;">
+            <label id="deposit-account-label">Account Info</label>
+            <div class="deposit-account-container">
+                <input type="text" id="deposit-account-info" readonly>
+                <button type="button" class="copy-btn" id="copyBtn">Copy</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount ($)</label>
+            <input type="number" id="amount" name="amount" placeholder="Min $5 - Max $9999999" min="5" max="9999999" required>
+            <div id="amount-message" class="message"></div>
+        </div>
+
+        <div id="payment-conversion" class="info-payment">
+            You Will Payment: <span>...</span>
+        </div>
+
+        <div class="form-group">
+            <label for="transaction-id">Transaction ID</label>
+            <input type="text" id="transaction-id" name="transaction-id" placeholder="Enter transaction ID" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" readonly>
+        </div>
+
+        <button type="submit" class="btn-deposit">Deposit</button>
+    </form>
+    <div id="status-message" class="message"></div>
+</div>
+
+<script>
+    // Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    // UI Elements
+    const form = document.getElementById('depositForm');
+    const depositMethodSelect = document.getElementById('depositMethod');
+    const amountInput = document.getElementById('amount');
+    const transactionIdInput = document.getElementById('transaction-id');
+    const usernameInput = document.getElementById('username');
+    const amountMessage = document.getElementById('amount-message');
+    const statusMessage = document.getElementById('status-message');
+    const depositAccountGroup = document.getElementById('deposit-account-group');
+    const depositAccountInfo = document.getElementById('deposit-account-info');
+    const depositAccountLabel = document.getElementById('deposit-account-label');
+    const copyBtn = document.getElementById('copyBtn');
+    
+    // New variables for payment calculation
+    let usdToBdtRate = 0;
+    const paymentConversionDisplay = document.querySelector('#payment-conversion span');
+    let currentUserId = null;
+    let selectedAccountInfo = '';
+    let selectedCurrency = '';
+
+    // --- Dynamic Loading of Methods ---
+    const depositMethodsRef = database.ref('payment_methods/withdraw_deposit_method');
+    depositMethodsRef.on('value', (snapshot) => {
+        const methods = snapshot.val();
+        depositMethodSelect.innerHTML = '<option value="">Select a method</option>'; // Reset dropdown
+        if (methods) {
+            Object.keys(methods).forEach(key => {
+                const method = methods[key];
+                const option = document.createElement('option');
+                option.value = method.name;
+                option.textContent = method.name;
+                option.setAttribute('data-account', method.account); // Store account info
+                option.setAttribute('data-currency', method.currency); // Store currency info
+                depositMethodSelect.appendChild(option);
+            });
+        } else {
+            depositMethodSelect.innerHTML = '<option value="">No methods available</option>';
+        }
+    }, (error) => {
+        console.error("Firebase Read Error (Deposit Methods):", error);
+        depositMethodSelect.innerHTML = '<option value="">Error loading methods</option>';
+    });
+
+    // --- Method Selection and Account Info Display ---
+    depositMethodSelect.addEventListener('change', () => {
+        const selectedOption = depositMethodSelect.options[depositMethodSelect.selectedIndex];
+        if (selectedOption.value) {
+            selectedAccountInfo = selectedOption.getAttribute('data-account');
+            selectedCurrency = selectedOption.getAttribute('data-currency');
+            depositAccountInfo.value = selectedAccountInfo;
+            depositAccountLabel.textContent = selectedOption.value + ' Account Info';
+            depositAccountGroup.style.display = 'flex';
+            updatePaymentConversion(); // Update display based on new method
+        } else {
+            depositAccountGroup.style.display = 'none';
+            selectedAccountInfo = '';
+            selectedCurrency = '';
+            paymentConversionDisplay.textContent = '...';
+        }
+    });
+
+    // --- Copy to Clipboard Functionality ---
+    copyBtn.addEventListener('click', () => {
+        if (selectedAccountInfo) {
+            navigator.clipboard.writeText(selectedAccountInfo)
+                .then(() => {
+                    alert('Account info copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy. Please copy manually.');
+                });
+        }
+    });
+
+    // --- User Data Loading ---
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUserId = user.uid;
+            
+            const userRef = database.ref('users/' + currentUserId);
+            userRef.on('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    usernameInput.value = userData.username || 'N/A';
+                } else {
+                    usernameInput.value = 'User Not Found';
+                }
+            });
+        } else {
+            usernameInput.value = 'Not Logged In';
+        }
+    });
+    
+    // --- Fetch the BDT exchange rate from Firebase ---
+    const exchangeRateRef = database.ref('update_all_rates/deposit_rate');
+    exchangeRateRef.on('value', (snapshot) => {
+        const rate = snapshot.val();
+        if (rate) {
+            usdToBdtRate = rate;
+            updatePaymentConversion();
+        } else {
+            usdToBdtRate = 0;
+            console.log('Exchange rate not available.');
+        }
+    }, (error) => {
+        console.error("Firebase Read Error (Exchange Rate):", error);
+        usdToBdtRate = 0;
+    });
+
+    // --- Function to update the payment conversion display ---
+    function updatePaymentConversion() {
+        const amount = parseFloat(amountInput.value);
+        if (isNaN(amount) || amount <= 0 || !selectedCurrency) {
+            paymentConversionDisplay.textContent = '...';
+            return;
+        }
+
+        if (selectedCurrency === 'BDT') {
+            const bdtAmount = amount * usdToBdtRate;
+            paymentConversionDisplay.textContent = `${bdtAmount.toFixed(2)} BDT`;
+        } else if (selectedCurrency === 'USD') {
+            paymentConversionDisplay.textContent = `$${amount.toFixed(2)}`;
+        }
+    }
+
+    // --- Live amount validation and payment conversion ---
+    amountInput.addEventListener('input', () => {
+        const amount = parseFloat(amountInput.value);
+        const min = parseFloat(amountInput.min);
+        const max = parseFloat(amountInput.max);
+
+        // Update payment display
+        updatePaymentConversion();
+
+        if (isNaN(amount) || amount < min || amount > max) {
+            amountMessage.textContent = 'Please enter a valid amount.';
+            amountMessage.classList.add('error');
+            amountMessage.classList.remove('success');
+        } else {
+            amountMessage.textContent = 'Amount is valid.';
+            amountMessage.classList.add('success');
+            amountMessage.classList.remove('error');
+        }
+
+        if (amountInput.value === '') {
+            amountMessage.textContent = '';
+            paymentConversionDisplay.textContent = '...';
+        }
+    });
+
+    // --- Form Validation and Submission ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!currentUserId) {
+            statusMessage.textContent = 'You are not logged in. Please log in to deposit.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+
+        const selectedOption = depositMethodSelect.options[depositMethodSelect.selectedIndex];
+        const selectedMethod = selectedOption.value;
+
+        if (!selectedMethod) {
+            statusMessage.textContent = 'Please select a deposit method.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+
+        const amount = parseFloat(amountInput.value);
+        const min = parseFloat(amountInput.min);
+        const max = parseFloat(amountInput.max);
+
+        if (isNaN(amount) || amount < min || amount > max) {
+            statusMessage.textContent = 'Please enter a valid amount as per the rules.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+
+        const transactionId = transactionIdInput.value;
+        const username = usernameInput.value;
+        const bdtAmount = selectedCurrency === 'BDT' ? amount * usdToBdtRate : null;
+        const usdAmount = amount;
+
+        const depositData = {
+            userId: currentUserId,
+            type: 'deposit', // Add type to distinguish between deposit and withdraw
+            method: selectedMethod,
+            amount: usdAmount,
+            amount_bdt: bdtAmount,
+            transactionId: transactionId,
+            username: username,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            status: 'pending'
+        };
+        
+        // Change the reference to 'deposit_withdraw_request'
+        const depositRef = database.ref('deposit_withdraw_request');
+        
+        try {
+            await depositRef.push(depositData);
+            
+            let paymentText = '';
+            if (selectedCurrency === 'BDT') {
+                paymentText = `${(amount * usdToBdtRate).toFixed(2)} BDT`;
+            } else {
+                paymentText = `$${amount.toFixed(2)}`;
+            }
+
+            statusMessage.textContent = `Deposit of $${amount.toFixed(2)} via ${selectedMethod} has been submitted for approval. You will pay ${paymentText}.`;
+            statusMessage.classList.add('success');
+            statusMessage.classList.remove('error');
+            
+            form.reset();
+            depositMethodSelect.value = '';
+            amountMessage.textContent = '';
+            paymentConversionDisplay.textContent = '...';
+            depositAccountGroup.style.display = 'none';
+        } catch (error) {
+            console.error("Firebase Write Error:", error);
+            statusMessage.textContent = 'Failed to process deposit. Please try again.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+        }
+    });
+    
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
+</body>
+</html>
