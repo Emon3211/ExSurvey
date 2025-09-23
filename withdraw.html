@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 26px;
+            color: #333;
+            margin: 0 auto;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #555;
+            text-decoration: none;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            border-color: #28a745;
+            outline: none;
+        }
+        .btn-withdraw {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .btn-withdraw:hover {
+            background-color: #218838;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .info-row span:last-child {
+            font-weight: bold;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a href="#" class="back-btn" onclick="goBack()">&#8592;</a>
+        <h1>Withdraw</h1>
+    </div>
+
+    <p style="text-align: center; margin-top: 0;">Your current balance: $<span id="current-balance">Loading...</span></p>
+
+    <form id="withdrawForm">
+        <div class="form-group">
+            <label for="withdrawalMethod">Select Method</label>
+            <select id="withdrawalMethod" required>
+                <option value="">Loading methods...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount ($)</label>
+            <input type="number" id="amount" name="amount" placeholder="Min $5 - Max $9999999" min="5" max="9999999" required>
+            <div id="amount-message" class="message"></div>
+        </div>
+
+        <div id="calculation-summary" style="margin-top: -10px; margin-bottom: 20px; display: none;">
+            <div class="info-row">
+                <span>Withdrawal Fee:</span>
+                <span id="fee-amount"></span>
+            </div>
+            <div class="info-row">
+                <span>You will get:</span>
+                <span id="you-will-get"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="account-no">Account Number</label>
+            <input type="text" id="account-no" name="account-no" placeholder="Enter your account number" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" readonly>
+        </div>
+
+        <button type="submit" class="btn-withdraw">Withdraw</button>
+    </form>
+    <div id="status-message" class="message"></div>
+</div>
+
+<script>
+    // Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    // UI Elements
+    const form = document.getElementById('withdrawForm');
+    const withdrawalMethodSelect = document.getElementById('withdrawalMethod');
+    const amountInput = document.getElementById('amount');
+    const accountNoInput = document.getElementById('account-no');
+    const usernameInput = document.getElementById('username');
+    const amountMessage = document.getElementById('amount-message');
+    const statusMessage = document.getElementById('status-message');
+    const currentBalanceDisplay = document.getElementById('current-balance');
+    const calculationSummary = document.getElementById('calculation-summary');
+    const feeAmountDisplay = document.getElementById('fee-amount');
+    const youWillGetDisplay = document.getElementById('you-will-get');
+
+    let usdToBdtRate = 0;
+    let currentBalance = 0;
+    let currentUserId = null;
+    let selectedFee = null;
+    let selectedCurrency = 'USD'; // Default currency
+
+    // Check if a user is logged in
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUserId = user.uid;
+            
+            const userRef = database.ref('users/' + currentUserId);
+            userRef.on('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    currentBalance = userData.balance !== undefined ? userData.balance : 0;
+                    currentBalanceDisplay.textContent = currentBalance.toFixed(2);
+                    usernameInput.value = userData.username || 'N/A';
+                    
+                    statusMessage.textContent = 'Balance and user info loaded successfully.';
+                    statusMessage.classList.add('success');
+                    statusMessage.classList.remove('error');
+                } else {
+                    currentBalanceDisplay.textContent = '0.00';
+                    statusMessage.textContent = 'User data not found in database.';
+                    statusMessage.classList.add('error');
+                    statusMessage.classList.remove('success');
+                }
+            }, (error) => {
+                console.error("Firebase Read Error:", error);
+                statusMessage.textContent = 'Failed to load user data.';
+                statusMessage.classList.add('error');
+                statusMessage.classList.remove('success');
+            });
+        } else {
+            currentBalanceDisplay.textContent = '0.00';
+            statusMessage.textContent = 'You are not logged in. Please log in to view your balance.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+        }
+    });
+
+    // Load Withdrawal Methods
+    const withdrawMethodsRef = database.ref('payment_methods/withdraw_deposit_method');
+    withdrawMethodsRef.on('value', (snapshot) => {
+        const methods = snapshot.val();
+        withdrawalMethodSelect.innerHTML = '<option value="">Select a method</option>';
+        if (methods) {
+            Object.keys(methods).forEach(key => {
+                const method = methods[key];
+                const option = document.createElement('option');
+                option.value = method.name;
+                option.textContent = method.name;
+                option.setAttribute('data-currency', method.currency || 'BDT');
+                option.setAttribute('data-fee', JSON.stringify(method.fee));
+                withdrawalMethodSelect.appendChild(option);
+            });
+        } else {
+            withdrawalMethodSelect.innerHTML = '<option value="">No methods available</option>';
+        }
+    }, (error) => {
+        console.error("Firebase Read Error (Withdraw Methods):", error);
+        withdrawalMethodSelect.innerHTML = '<option value="">Error loading methods</option>';
+    });
+
+    // Method Selection change event listener
+    withdrawalMethodSelect.addEventListener('change', () => {
+        const selectedOption = withdrawalMethodSelect.options[withdrawalMethodSelect.selectedIndex];
+        
+        if (selectedOption.value) {
+            selectedCurrency = selectedOption.getAttribute('data-currency');
+            const feeData = selectedOption.getAttribute('data-fee');
+            selectedFee = JSON.parse(feeData);
+
+            // Re-run calculations for the new method
+            updateCalculations();
+        } else {
+            // Hide summary if no method is selected
+            calculationSummary.style.display = 'none';
+            selectedFee = null;
+        }
+    });
+
+    // Fetch the BDT exchange rate from Firebase
+    const exchangeRateRef = database.ref('update_all_rates/withdraw_rate');
+    exchangeRateRef.on('value', (snapshot) => {
+        const rate = snapshot.val();
+        if (rate) {
+            usdToBdtRate = rate;
+            updateCalculations();
+        } else {
+            usdToBdtRate = 0;
+            console.log('Exchange rate not available.');
+        }
+    }, (error) => {
+        console.error("Firebase Read Error (Exchange Rate):", error);
+        usdToBdtRate = 0;
+    });
+
+    // Function to update all calculations
+    function updateCalculations() {
+        const amount = parseFloat(amountInput.value);
+        if (isNaN(amount) || amount <= 0 || !selectedFee) {
+            calculationSummary.style.display = 'none';
+            return;
+        }
+
+        calculationSummary.style.display = 'block';
+
+        let fee = 0;
+        let finalAmount = 0;
+        
+        // Calculate fee
+        if (selectedCurrency === 'USD') {
+            if (selectedFee.type === 'fixed') {
+                fee = selectedFee.value;
+            } else if (selectedFee.type === 'percent') {
+                fee = (amount * selectedFee.value) / 100;
+            }
+            finalAmount = amount - fee;
+            feeAmountDisplay.textContent = `$${fee.toFixed(2)}`;
+            youWillGetDisplay.textContent = `$${finalAmount.toFixed(2)}`;
+        } else if (selectedCurrency === 'BDT') {
+            let bdtAmountBeforeFee = amount * usdToBdtRate;
+            if (selectedFee.type === 'fixed') {
+                fee = selectedFee.value;
+            } else if (selectedFee.type === 'percent') {
+                fee = (bdtAmountBeforeFee * selectedFee.value) / 100;
+            }
+            finalAmount = bdtAmountBeforeFee - fee;
+            feeAmountDisplay.textContent = `${fee.toFixed(2)} ৳`;
+            youWillGetDisplay.textContent = `${finalAmount.toFixed(2)} ৳`;
+        }
+    }
+
+    // Live amount validation and calculations
+    amountInput.addEventListener('input', () => {
+        const amount = parseFloat(amountInput.value);
+        const min = parseFloat(amountInput.min);
+        const max = parseFloat(amountInput.max);
+
+        // Update calculations on every input
+        updateCalculations();
+
+        if (isNaN(amount) || amount <= 0) {
+            amountMessage.textContent = 'Please enter a valid amount.';
+            amountMessage.classList.add('error');
+            amountMessage.classList.remove('success');
+        } else if (amount < min) {
+            amountMessage.textContent = `Amount must be at least $${min}.`;
+            amountMessage.classList.add('error');
+            amountMessage.classList.remove('success');
+        } else if (amount > max) {
+            amountMessage.textContent = `Amount cannot exceed $${max}.`;
+            amountMessage.classList.add('error');
+            amountMessage.classList.remove('success');
+        } else if (amount > currentBalance) {
+            amountMessage.textContent = `Insufficient balance. Your current balance is $${currentBalance.toFixed(2)}.`;
+            amountMessage.classList.add('error');
+            amountMessage.classList.remove('success');
+        } else {
+            amountMessage.textContent = 'Amount is valid.';
+            amountMessage.classList.add('success');
+            amountMessage.classList.remove('error');
+        }
+
+        if (amountInput.value === '') {
+            amountMessage.textContent = '';
+            calculationSummary.style.display = 'none';
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!currentUserId) {
+            statusMessage.textContent = 'You are not logged in. Please log in to withdraw.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+
+        const selectedOption = withdrawalMethodSelect.options[withdrawalMethodSelect.selectedIndex];
+        const selectedMethod = selectedOption.value;
+
+        if (!selectedMethod) {
+            statusMessage.textContent = 'Please select a withdrawal method.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+
+        const amount = parseFloat(amountInput.value);
+        const min = parseFloat(amountInput.min);
+        const max = parseFloat(amountInput.max);
+
+        if (isNaN(amount) || amount < min || amount > max) {
+            statusMessage.textContent = 'Please enter a valid amount as per the rules.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+
+        if (amount > currentBalance) {
+            statusMessage.textContent = `Withdrawal amount (${amount.toFixed(2)}) exceeds your balance. Your balance is $${currentBalance.toFixed(2)}.`;
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+            return;
+        }
+        
+        let fee = 0;
+        let finalAmount = 0;
+        let bdtAmount = null;
+
+        if (selectedCurrency === 'USD') {
+            if (selectedFee.type === 'fixed') {
+                fee = selectedFee.value;
+            } else if (selectedFee.type === 'percent') {
+                fee = (amount * selectedFee.value) / 100;
+            }
+            finalAmount = amount - fee;
+        } else if (selectedCurrency === 'BDT') {
+            bdtAmount = amount * usdToBdtRate;
+            if (selectedFee.type === 'fixed') {
+                fee = selectedFee.value;
+            } else if (selectedFee.type === 'percent') {
+                fee = (bdtAmount * selectedFee.value) / 100;
+            }
+            finalAmount = bdtAmount - fee;
+        }
+
+        const accountNo = accountNoInput.value;
+        const username = usernameInput.value;
+        const timestamp = firebase.database.ServerValue.TIMESTAMP;
+
+        const withdrawData = {
+            userId: currentUserId,
+            type: 'withdraw', // Add type to distinguish between deposit and withdraw
+            method: selectedMethod,
+            amount: amount,
+            fee: fee,
+            finalAmount: finalAmount,
+            bdtAmount: bdtAmount,
+            accountNo: accountNo,
+            username: username,
+            status: 'Pending',
+            timestamp: timestamp
+        };
+        
+        // Change the reference to 'deposit_withdraw_request'
+        const withdrawRef = database.ref('deposit_withdraw_request');
+        
+        try {
+            await withdrawRef.push(withdrawData);
+
+            let message = `Withdrawal of $${amount.toFixed(2)} to ${selectedMethod} has been submitted for approval.`;
+            if (selectedCurrency === 'USD') {
+                message += ` You will receive $${finalAmount.toFixed(2)} (after fee)`;
+            } else if (selectedCurrency === 'BDT') {
+                message += ` You will receive ${finalAmount.toFixed(2)} BDT (after fee)`;
+            }
+
+            statusMessage.textContent = message;
+            statusMessage.classList.add('success');
+            statusMessage.classList.remove('error');
+            
+            form.reset();
+            withdrawalMethodSelect.value = '';
+            amountInput.value = '';
+            amountMessage.textContent = '';
+            calculationSummary.style.display = 'none';
+
+        } catch (error) {
+            console.error("Firebase Write Error:", error);
+            statusMessage.textContent = 'Failed to process withdrawal. Please try again.';
+            statusMessage.classList.add('error');
+            statusMessage.classList.remove('success');
+        }
+    });
+    
+    // Back button functionality
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
+</body>
+</html>
