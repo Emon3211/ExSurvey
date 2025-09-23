@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExSurvey</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .header {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+        .nav-container {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .left-link {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .center-btn {
+            flex-grow: 1;
+            text-align: center;
+        }
+        .right-btn {
+            flex-grow: 1;
+            text-align: right;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #007bff;
+            font-size: 16px;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .btn-login {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .btn-login:hover {
+            background-color: #0056b3;
+        }
+        .btn-signup {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .btn-signup:hover {
+            background-color: #218838;
+        }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-icon {
+            font-size: 40px;
+            color: #4CAF50;
+            background-color: #e8f5e9;
+            border-radius: 50%;
+            padding: 15px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 20px;
+            color: #555;
+            margin: 0;
+        }
+        .card-data {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0 0;
+        }
+        .faq-section {
+            background-color: #f0f2f5;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        .faq-section h2 {
+            text-align: center;
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .faq-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            padding: 20px;
+        }
+        .faq-question {
+            font-size: 20px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .faq-answer {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+        .footer {
+            background-color: #333;
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .footer-image img {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .footer-content {
+            margin-bottom: 20px;
+        }
+        .footer-content h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .footer-content p {
+            margin: 5px 0;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .footer-links li {
+            margin: 10px 0;
+        }
+        .footer-links a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer-links a:hover {
+            color: #007bff;
+        }
+        .social-icons {
+            margin-top: 20px;
+        }
+        .social-icons a {
+            color: #fff;
+            font-size: 24px;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .social-icons a:hover {
+            color: #007bff;
+        }
+        .copyright {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #bbb;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">ExSurvey</div>
+    </header>
+
+    <div class="nav-container">
+        <div class="left-link">
+            <a href="index.html" class="nav-link">Home</a>
+        </div>
+        <div class="center-btn">
+            <button class="btn btn-login" onclick="window.location.href='login.html'">Login</button>
+        </div>
+        <div class="right-btn">
+            <button class="btn btn-signup" onclick="window.location.href='signup.html'">Sign Up</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="card-data">...</div>
+            <h3 class="card-title">Total Users</h3>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="card-data">...</div>
+            <h3 class="card-title">Total Withdrawals</h3>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-list-ul"></i>
+            </div>
+            <div class="card-data">...</div>
+            <h3 class="card-title">Total Task Categories</h3>
+        </div>
+
+        <div class="card">
+            <div class="card-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="card-data">...</div>
+            <h3 class="card-title">Total Tasks</h3>
+        </div>
+    </div>
+
+    <div class="faq-section">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-card">
+            <div class="faq-question">How do I get started?</div>
+            <div class="faq-answer">
+                Sign up for an account, create your profile, and dive right in—whether you're looking to post gigs or find the perfect freelancer. In just a few easy steps, you can begin earning or getting work done efficiently. Join a community of talented professionals and clients ready to collaborate and achieve success together.
+            </div>
+        </div>
+
+        <div class="faq-card">
+            <div class="faq-question">How are payment processed?</div>
+            <div class="faq-answer">
+                Payments are securely processed through our platform to ensure a smooth and reliable experience for both freelancers and clients. Once a gig is successfully completed, the payment is seamlessly transferred to the freelancer. Clients can conveniently pay using credit cards, cryptocurrency, or other supported payment methods, providing flexibility and peace of mind.
+            </div>
+        </div>
+
+        <div class="faq-card">
+            <div class="faq-question">What happens if I have an issue?</div>
+            <div class="faq-answer">
+                If you encounter any issues, our dedicated support team is always ready to assist you. Whether you need help resolving disputes, have questions about the platform, or require guidance on navigating your projects, we are here to ensure everything runs smoothly. Our goal is to provide a hassle-free experience for both freelancers and clients.
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-image">
+             <img src="https://via.placeholder.com/150x150.png?text=Contact+Icon" alt="Contact Icon">
+        </div>
+        <div class="footer-content">
+            <h3>Contact Us Now</h3>
+            <p>Email: <a href="mailto:support@exsurvey.com" style="color: #fff; text-decoration: none;">support@exsurvey.com</a></p>
+            <p><a href="mailto:exsurveyteam@gmail.com" style="color: #fff; text-decoration: none;">Leave a message</a></p>
+        </div>
+        <ul class="footer-links">
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="about.html">About Us</a></li>
+        </ul>
+        <div class="social-icons">
+            <p>Social:</p>
+            <a href="https://www.youtube.com/@ExSurvey" target="_blank"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61580025557448" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://chat.whatsapp.com/KDm94eBzNHMHwJY04raNqA" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+        <div class="copyright">
+            <p>© 2025 ExSurvey. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+      import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+      // আপনার ওয়েব অ্যাপের Firebase কনফিগারেশন
+      const firebaseConfig = {
+        apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+        authDomain: "exsurvey-1c78a.firebaseapp.com",
+        databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+        projectId: "exsurvey-1c78a",
+        storageBucket: "exsurvey-1c78a.firebasestorage.app",
+        messagingSenderId: "754959615386",
+        appId: "1:754959615386:web:65c390db232a7dafd3e623",
+        measurementId: "G-8SQNS2DLBT"
+      };
+
+      // Firebase ইনিশিয়ালাইজ করুন
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+
+      // ডেটার রেফারেন্স নিন
+      const totalUsersRef = ref(database, 'indexdata/total_users');
+      const totalWithdrawalsRef = ref(database, 'indexdata/total_withdrawals');
+      const totalTaskCategoriesRef = ref(database, 'indexdata/total_task_categories');
+      const totalTasksRef = ref(database, 'indexdata/total_tasks');
+
+      // পরিবর্তনগুলো শুনুন এবং HTML আপডেট করুন
+      onValue(totalUsersRef, (snapshot) => {
+        const users = snapshot.val();
+        if (users !== null) {
+          document.querySelector('.dashboard-container .card:nth-child(1) .card-data').textContent = users;
+        }
+      });
+
+      onValue(totalWithdrawalsRef, (snapshot) => {
+        const withdrawals = snapshot.val();
+        if (withdrawals !== null) {
+          document.querySelector('.dashboard-container .card:nth-child(2) .card-data').textContent = withdrawals;
+        }
+      });
+
+      onValue(totalTaskCategoriesRef, (snapshot) => {
+        const categories = snapshot.val();
+        if (categories !== null) {
+          document.querySelector('.dashboard-container .card:nth-child(3) .card-data').textContent = categories;
+        }
+      });
+
+      onValue(totalTasksRef, (snapshot) => {
+        const tasks = snapshot.val();
+        if (tasks !== null) {
+          document.querySelector('.dashboard-container .card:nth-child(4) .card-data').textContent = tasks;
+        }
+      });
+    </script>
+</body>
+</html>
