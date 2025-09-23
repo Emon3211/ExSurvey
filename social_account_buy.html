@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Social Media Accounts</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+            color: #555;
+            text-align: right;
+        }
+        .back-btn {
+            font-size: 24px;
+            color: #555;
+            text-decoration: none;
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="number"], input[type="tel"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .card-container {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .account-card {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        .card-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .card-header span {
+            color: #007bff;
+        }
+        .card-body p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .card-footer span {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .buy-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .buy-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .close-btn {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-header h2 {
+            margin-top: 0;
+            font-size: 24px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        #total-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+        .balance-info {
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a href="#" class="back-btn" onclick="goBack()">&#8592;</a>
+        <h1>Buy Social Media Accounts</h1>
+        <div class="user-info">
+            <p>Username: <span id="display-username">N/A</span></p>
+            <p>Balance: $<span id="display-balance">0.00</span></p>
+        </div>
+    </div>
+    
+    <div id="account-cards" class="card-container">
+        </div>
+</div>
+
+<div id="buyModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('buy')">&times;</span>
+        <div class="modal-header">
+            <h2 id="modal-buy-title"></h2>
+        </div>
+        <form id="buyForm">
+            <div class="form-group">
+                <label>Per price: $<span id="modal-buy-price">0.00</span></label>
+            </div>
+            <div class="form-group">
+                <label>Stock: <span id="modal-buy-stock">0</span> p</label>
+            </div>
+            <div class="form-group">
+                <label for="buy-quantity">How many accounts will you take?</label>
+                <input type="number" id="buy-quantity" name="buy-quantity" min="1" required oninput="calculateTotal('buy')">
+            </div>
+            <div class="form-group">
+                <label>Total Cost: $<span id="total-buy-amount" class="balance-info">0.00</span></label>
+            </div>
+            <div class="form-group">
+                <label for="buy-whatsapp-no">Your WhatsApp No.</label>
+                <input type="tel" id="buy-whatsapp-no" name="buy-whatsapp-no" required>
+            </div>
+            <div class="form-group">
+                <label for="buy-username">Username</label>
+                <input type="text" id="buy-username" name="buy-username" readonly>
+            </div>
+            <button type="submit" class="buy-btn" style="width: 100%;">Buy Confirm</button>
+        </form>
+        <p id="buy-status-message" class="message"></p>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    const accountCardsContainer = document.getElementById('account-cards');
+    const buyModal = document.getElementById('buyModal');
+    const buyForm = document.getElementById('buyForm');
+    const buyStatusMessage = document.getElementById('buy-status-message');
+
+    let selectedAccountId = null;
+    let selectedAccountData = null;
+    let selectedAccountType = null; // New variable to store the account type
+    let currentUserId = null;
+    let currentUsername = 'Not Logged In';
+    
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            currentUserId = user.uid;
+            // Fetch user info and balance
+            database.ref('users/' + currentUserId).on('value', (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    currentUsername = userData.username || 'N/A';
+                    const userBalance = userData.balance || 0;
+                    document.getElementById('display-username').textContent = currentUsername;
+                    document.getElementById('display-balance').textContent = userBalance.toFixed(2);
+                    document.getElementById('buy-username').value = currentUsername;
+                }
+            });
+        }
+    });
+
+    // New function to load all accounts
+    function loadAllAccounts() {
+        accountCardsContainer.innerHTML = ''; // Clear existing cards
+        database.ref('social_account_buy').once('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                let hasAccounts = false;
+                Object.keys(data).forEach(accountType => {
+                    const accountsOfType = data[accountType];
+                    Object.keys(accountsOfType).forEach(accountId => {
+                        const account = accountsOfType[accountId];
+                        const card = document.createElement('div');
+                        card.className = 'account-card';
+                        card.innerHTML = `
+                            <div class="card-header">
+                                <h3>${accountType}</h3>
+                                <span>Stock: ${account.stock} p</span>
+                            </div>
+                            <p>Description: ${account.description}</p>
+                            <div class="card-footer">
+                                <span>Price: ${account.price.toFixed(2)}$</span>
+                                <button class="buy-btn" onclick="openModal('${accountId}', '${accountType}', 'buy')">Buy</button>
+                            </div>
+                        `;
+                        accountCardsContainer.appendChild(card);
+                        hasAccounts = true;
+                    });
+                });
+                if (!hasAccounts) {
+                    accountCardsContainer.innerHTML = `<p style="text-align: center; color: #888;">No accounts are currently available.</p>`;
+                }
+            } else {
+                accountCardsContainer.innerHTML = `<p style="text-align: center; color: #888;">No accounts are currently available.</p>`;
+            }
+        });
+    }
+
+    function openModal(accountId, accountType, action) {
+        if (!currentUserId) {
+            alert('Please log in to proceed.');
+            return;
+        }
+
+        selectedAccountId = accountId;
+        selectedAccountType = accountType;
+        database.ref('social_account_buy/' + selectedAccountType + '/' + selectedAccountId).once('value', (snapshot) => {
+            selectedAccountData = snapshot.val();
+            if (selectedAccountData) {
+                document.getElementById('modal-buy-title').textContent = `${selectedAccountType} Account`;
+                document.getElementById('modal-buy-price').textContent = selectedAccountData.price.toFixed(2);
+                document.getElementById('modal-buy-stock').textContent = selectedAccountData.stock;
+                document.getElementById('buy-quantity').max = selectedAccountData.stock;
+                document.getElementById('buy-quantity').value = 1;
+                document.getElementById('buy-username').value = currentUsername;
+                calculateTotal('buy');
+                buyModal.style.display = 'flex';
+                buyStatusMessage.textContent = '';
+            }
+        });
+    }
+
+    function closeModal(type) {
+        if (type === 'buy') {
+            buyModal.style.display = 'none';
+            buyForm.reset();
+            buyStatusMessage.textContent = '';
+            selectedAccountData = null;
+        }
+    }
+
+    function calculateTotal(type) {
+        if (type === 'buy') {
+            const quantityInput = document.getElementById('buy-quantity');
+            const quantity = parseFloat(quantityInput.value);
+            if (quantity > selectedAccountData.stock) {
+                alert("Sorry, you can't order more than the available stock.");
+                quantityInput.value = selectedAccountData.stock;
+            }
+            if (selectedAccountData) {
+                const total = selectedAccountData.price * quantityInput.value;
+                document.getElementById('total-buy-amount').textContent = total.toFixed(2);
+            }
+        }
+    }
+
+    buyForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const quantity = parseFloat(document.getElementById('buy-quantity').value);
+        const whatsappNo = document.getElementById('buy-whatsapp-no').value;
+        const totalAmount = parseFloat(document.getElementById('total-buy-amount').textContent);
+
+        if (quantity > selectedAccountData.stock) {
+            alert("Cannot order more than available stock.");
+            return;
+        }
+
+        database.ref('users/' + currentUserId).once('value', (snapshot) => {
+            const userData = snapshot.val();
+            const userBalance = userData.balance || 0;
+            
+            if (totalAmount > userBalance) {
+                buyStatusMessage.textContent = 'Insufficient balance. Please add funds to your account.';
+                buyStatusMessage.style.color = 'red';
+                return;
+            }
+            
+            const orderData = {
+                userId: currentUserId,
+                username: currentUsername,
+                accountType: selectedAccountType, // Use the new variable
+                accountId: selectedAccountId,
+                quantity: quantity,
+                totalAmount: totalAmount,
+                whatsappNo: whatsappNo,
+                action: 'Buy',
+                status: 'Pending',
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('social_account_buy_history').push(orderData)
+                .then(() => {
+                    const newStock = selectedAccountData.stock - quantity;
+                    database.ref('social_account_buy/' + selectedAccountType + '/' + selectedAccountId).update({ stock: newStock });
+                    
+                    buyStatusMessage.textContent = 'Order Confirmed! You will be contacted on WhatsApp within 12 hours. Please reply "ok" when you get the message.';
+                    buyStatusMessage.style.color = 'green';
+                    document.getElementById('buy-whatsapp-no').disabled = true;
+                    document.getElementById('buy-quantity').disabled = true;
+                    buyForm.querySelector('button[type="submit"]').disabled = true;
+                    
+                    loadAllAccounts(); // Reload all cards to show updated stock
+                })
+                .catch(error => {
+                    buyStatusMessage.textContent = 'Order confirmation failed. Please try again.';
+                    buyStatusMessage.style.color = 'red';
+                });
+        });
+    });
+
+    function goBack() {
+        window.history.back();
+    }
+    
+    // Call the new function to load all accounts on page load
+    document.addEventListener('DOMContentLoaded', loadAllAccounts);
+</script>
+</body>
+</html>
