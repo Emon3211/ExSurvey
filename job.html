@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            flex-grow: 1;
+            margin: 0;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .back-btn {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .dropbtn {
+            background-color: #555;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .job-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .job-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 15px;
+            padding: 20px;
+            width: 300px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: none;
+        }
+        .job-card.visible {
+            display: block;
+        }
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .job-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .job-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .card-footer .balance {
+            font-size: 1.2em;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .card-footer .apply-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>
+        <div class="dropdown">
+            <button class="dropbtn">Selected Jobs ▼</button>
+            <div class="dropdown-content">
+                <a href="#" onclick="showJobs('all')">All Jobs</a>
+                <a href="#" onclick="showJobs('micro')">Micro Jobs</a>
+                <a href="#" onclick="showJobs('like')">Like Jobs</a>
+                <a href="#" onclick="showJobs('follow')">Follow Jobs</a>
+                <a href="#" onclick="showJobs('comment')">Comment Jobs</a>
+                <a href="#" onclick="showJobs('share')">Share Jobs</a>
+            </div>
+        </div>
+    </h1>
+    <button class="back-btn" onclick="history.back()">Back</button>
+</div>
+
+<div class="job-container" id="job-container">
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    // আপনার Firebase কনফিগারেশন
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const jobsRef = ref(database, 'jobs');
+
+    let allJobs = {};
+
+    onValue(jobsRef, (snapshot) => {
+        const jobContainer = document.getElementById('job-container');
+        jobContainer.innerHTML = '';
+        allJobs = snapshot.val() || {};
+
+        if (Object.keys(allJobs).length === 0) {
+            jobContainer.innerHTML = '<p style="text-align: center;">No jobs available at the moment.</p>';
+            return;
+        }
+
+        for (const key in allJobs) {
+            const job = allJobs[key];
+            const jobCard = document.createElement('div');
+            jobCard.className = 'job-card visible';
+            jobCard.setAttribute('data-category', job.category);
+            jobCard.innerHTML = `
+                <h3>${job.title}</h3>
+                <p>${job.description}</p>
+                <div class="card-footer">
+                    <span class="balance">$${job.balance.toFixed(2)}</span>
+                    <a href="job_submit.html?id=${key}" class="apply-btn">Apply Now</a>
+                </div>
+            `;
+            jobContainer.appendChild(jobCard);
+        }
+    });
+
+    function showJobs(category) {
+        const cards = document.querySelectorAll('.job-card');
+        cards.forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+                card.classList.add('visible');
+            } else {
+                card.classList.remove('visible');
+            }
+        });
+    }
+
+    window.showJobs = showJobs;
+</script>
+
+</body>
+</html>
