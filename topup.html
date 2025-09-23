@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daimond TopUp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .header .back-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .user-info {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+            padding-left: 10px;
+        }
+        .package-grid, .method-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .package-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .method-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .card:hover, .card.selected {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            background-color: #e9f5ff;
+        }
+        .card p {
+            margin: 5px 0 0;
+            font-weight: bold;
+        }
+        .amount-display {
+            font-size: 22px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .payment-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .payment-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #dc3545;
+            margin-top: 10px;
+        }
+        .copy-btn {
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #5a6268;
+        }
+        .info-input {
+            margin-bottom: 15px;
+        }
+        .info-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .info-input input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">&#x2190;</button>
+        <h1>Daimond TopUp</h1>
+    </div>
+
+    <div class="user-info">
+        <p>Username: <span id="username">Loading...</span></p>
+    </div>
+
+    <h2 class="section-title">Select Daimond Package</h2>
+    <div id="diamond-packages" class="package-grid">
+        </div>
+
+    <div class="amount-display">
+        <p>Payment Amount: <span id="payment-amount">0</span> BDT</p>
+    </div>
+
+    <h2 class="section-title">Select Payment Method</h2>
+    <div id="payment-methods" class="method-grid">
+        </div>
+
+    <div class="payment-info" id="payment-info" style="display: none;">
+        <p>Send money to this number:</p>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <p id="payment-number" class="payment-number"></p>
+            <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+        <small>Only send money, do not call.</small>
+    </div>
+
+    <div class="info-input">
+        <label for="transaction-id">Transaction ID</label>
+        <input type="text" id="transaction-id" placeholder="Enter your Transaction ID" required>
+    </div>
+
+    <div class="info-input">
+        <label for="player-id">FreeFire Player ID</label>
+        <input type="text" id="player-id" placeholder="Enter your FreeFire Player ID" required>
+    </div>
+
+    <button id="topup-now-btn" class="submit-btn">TopUp Now</button>
+
+    <div id="message" class="message"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let selectedDiamondPackage = null;
+    let selectedPaymentMethod = null;
+    let loggedInUser = null;
+    let loggedInUsername = null;
+
+    // Listen for auth state changes to get the logged-in user's UID
+    firebase.auth().onAuthStateChanged((user) => {
+        const usernameSpan = document.getElementById('username');
+        if (user) {
+            loggedInUser = user;
+            // Fetch username from the 'users' node using the user's UID
+            const userRef = database.ref(`users/${user.uid}`);
+            userRef.once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    if (userData && userData.username) {
+                        loggedInUsername = userData.username;
+                        usernameSpan.innerText = loggedInUsername;
+                    } else {
+                        usernameSpan.innerText = 'Username not found';
+                    }
+                    // Load other data once the username is fetched
+                    loadDiamondPackages();
+                    loadPaymentMethods();
+                })
+                .catch((error) => {
+                    console.error("Error loading user data:", error);
+                    usernameSpan.innerText = 'Error loading user data';
+                });
+        } else {
+            loggedInUser = null;
+            loggedInUsername = null;
+            usernameSpan.innerText = 'Not Logged In';
+            // You might want to redirect to a login page here
+            // window.location.href = "login.html";
+        }
+    });
+
+    // Function to load diamond packages from Firebase
+    function loadDiamondPackages() {
+        const packagesRef = database.ref('freefire_daimond').orderByChild('diamonds');
+        packagesRef.on('value', (snapshot) => {
+            const packagesContainer = document.getElementById('diamond-packages');
+            packagesContainer.innerHTML = '';
+            snapshot.forEach((childSnapshot) => {
+                const packageData = childSnapshot.val();
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('data-price', packageData.price);
+                card.innerHTML = `
+                    <p>${packageData.diamonds} Daimonds</p>
+                    <small>${packageData.price} BDT</small>
+                `;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('#diamond-packages .card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedDiamondPackage = packageData;
+                    document.getElementById('payment-amount').innerText = packageData.price;
+                });
+                packagesContainer.appendChild(card);
+            });
+        });
+    }
+
+    // Function to load payment methods from Firebase
+    function loadPaymentMethods() {
+        const methodsRef = database.ref('freefire_method');
+        methodsRef.on('value', (snapshot) => {
+            const methodsContainer = document.getElementById('payment-methods');
+            methodsContainer.innerHTML = '';
+            snapshot.forEach((childSnapshot) => {
+                const methodData = childSnapshot.val();
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('data-number', methodData.number);
+                card.innerHTML = `
+                    <p>${methodData.name}</p>
+                `;
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('#payment-methods .card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedPaymentMethod = methodData;
+                    document.getElementById('payment-number').innerText = methodData.number;
+                    document.getElementById('payment-info').style.display = 'block';
+                });
+                methodsContainer.appendChild(card);
+            });
+        });
+    }
+
+    // Function to handle top-up request submission
+    document.getElementById('topup-now-btn').addEventListener('click', () => {
+        const transactionId = document.getElementById('transaction-id').value;
+        const playerId = document.getElementById('player-id').value;
+        const messageBox = document.getElementById('message');
+
+        if (!loggedInUser || !loggedInUsername) {
+            messageBox.style.display = 'block';
+            messageBox.className = 'message';
+            messageBox.style.backgroundColor = '#f8d7da';
+            messageBox.style.color = '#721c24';
+            messageBox.style.border = '1px solid #f5c6cb';
+            messageBox.innerText = 'You must be logged in to make a top-up request.';
+            return;
+        }
+
+        if (!selectedDiamondPackage || !selectedPaymentMethod || !transactionId || !playerId) {
+            messageBox.style.display = 'block';
+            messageBox.className = 'message';
+            messageBox.style.backgroundColor = '#f8d7da';
+            messageBox.style.color = '#721c24';
+            messageBox.style.border = '1px solid #f5c6cb';
+            messageBox.innerText = 'Please fill out all fields and select a package and payment method.';
+            return;
+        }
+
+        const topupRequest = {
+            username: loggedInUsername,
+            userId: loggedInUser.uid,
+            playerId: playerId,
+            diamondPackage: selectedDiamondPackage.diamonds,
+            amount: selectedDiamondPackage.price,
+            paymentMethod: selectedPaymentMethod.name,
+            paymentNumber: selectedPaymentMethod.number,
+            transactionId: transactionId,
+            status: 'pending',
+            timestamp: new Date().toISOString()
+        };
+
+        // Save the request to Firebase
+        database.ref('topup_request').push(topupRequest)
+            .then(() => {
+                messageBox.style.display = 'block';
+                messageBox.className = 'message success';
+                messageBox.innerText = 'Your top-up request has been submitted successfully!';
+                
+                // Clear form fields
+                document.getElementById('transaction-id').value = '';
+                document.getElementById('player-id').value = '';
+                document.getElementById('payment-amount').innerText = '0';
+                document.getElementById('payment-info').style.display = 'none';
+                document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+                selectedDiamondPackage = null;
+                selectedPaymentMethod = null;
+            })
+            .catch((error) => {
+                messageBox.style.display = 'block';
+                messageBox.className = 'message';
+                messageBox.style.backgroundColor = '#f8d7da';
+                messageBox.style.color = '#721c24';
+                messageBox.style.border = '1px solid #f5c6cb';
+                messageBox.innerText = `Error: ${error.message}`;
+            });
+    });
+
+    // Copy to clipboard functionality
+    document.getElementById('copy-btn').addEventListener('click', () => {
+        const number = document.getElementById('payment-number').innerText;
+        navigator.clipboard.writeText(number).then(() => {
+            alert('Payment number copied to clipboard!');
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    });
+</script>
+
+</body>
+</html>
