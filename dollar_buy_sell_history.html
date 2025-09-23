@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Request Status</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+        }
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin: 0;
+            text-align: center;
+        }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: #555;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .request-list-container {
+            margin-top: 20px;
+        }
+        .request-item {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            border-left: 5px solid;
+            position: relative;
+        }
+        /* Request Type Colors */
+        .request-item.buy { border-left-color: #007bff; }
+        .request-item.sell { border-left-color: #28a745; }
+        /* Status Colors */
+        .status {
+            font-weight: bold;
+            text-transform: capitalize;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .status.pending { background-color: #ffc107; color: #5e4e00; }
+        .status.approved { background-color: #28a745; color: white; }
+        .status.rejected { background-color: #dc3545; color: white; }
+
+        .request-item h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .request-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .no-requests {
+            text-align: center;
+            color: #888;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="#" class="back-btn" onclick="goBack()">&#8592;</a>
+    <div class="header">
+        <h1>My Request Status</h1>
+    </div>
+
+    <div id="request-list" class="request-list-container">
+        <p style="text-align: center; color: #888;">Please log in to see your requests.</p>
+    </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCS5HN0yT3e7el75fBc2HLcLmTnrcQZ7bc",
+      authDomain: "exsurvey-1c78a.firebaseapp.com",
+      databaseURL: "https://exsurvey-1c78a-default-rtdb.firebaseio.com",
+      projectId: "exsurvey-1c78a",
+      storageBucket: "exsurvey-1c78a.firebasestorage.app",
+      messagingSenderId: "754959615386",
+      appId: "1:754959615386:web:65c390db232a7dafd3e623",
+      measurementId: "G-8SQNS2DLBT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
+    
+    const requestList = document.getElementById('request-list');
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            const userId = user.uid;
+            loadUserRequests(userId);
+        } else {
+            requestList.innerHTML = '<p class="no-requests">Please log in to view your requests.</p>';
+        }
+    });
+
+    // Load user-specific requests from Firebase
+    function loadUserRequests(userId) {
+        requestList.innerHTML = '<p class="no-requests">Loading...</p>';
+        
+        // Corrected Firebase path and added query to fetch the last 10 requests
+        database.ref('dollar_buy_sell_request_history')
+            .orderByChild('userId')
+            .equalTo(userId)
+            .limitToLast(10) // Shows the last 10 requests based on timestamp
+            .on('value', (snapshot) => {
+                const requests = snapshot.val();
+                requestList.innerHTML = '';
+                
+                if (requests) {
+                    const requestKeys = Object.keys(requests).reverse(); // Reverse to show latest first
+                    requestKeys.forEach(key => {
+                        const request = requests[key];
+                        const requestItem = document.createElement('div');
+                        requestItem.className = `request-item ${request.type}`;
+                        
+                        let statusClass = request.status.toLowerCase();
+                        let transactionDetails;
+
+                        if (request.type === 'buy') {
+                            transactionDetails = `
+                                <p><span class="info-label">Payment Method:</span> ${request.paymentMethod}</p>
+                                <p><span class="info-label">Received Method:</span> ${request.receivedMethod}</p>
+                                <p><span class="info-label">Transaction ID:</span> ${request.tnxId}</p>
+                            `;
+                        } else if (request.type === 'sell') {
+                            transactionDetails = `
+                                <p><span class="info-label">Dollar Send Method:</span> ${request.sendMethod}</p>
+                                <p><span class="info-label">Received Method:</span> ${request.receivedMethod}</p>
+                                <p><span class="info-label">Transaction ID:</span> ${request.tnxId}</p>
+                            `;
+                        } else {
+                            transactionDetails = '';
+                        }
+
+                        requestItem.innerHTML = `
+                            <span class="status ${statusClass}">${request.status}</span>
+                            <h4>${request.type.toUpperCase()} Request</h4>
+                            <p><span class="info-label">Amount:</span> $${request.dollarAmount}</p>
+                            <p><span class="info-label">Total BDT:</span> ${request.totalBDT ? request.totalBDT.toFixed(2) : 'N/A'}</p>
+                            ${transactionDetails}
+                            <p><span class="info-label">Request Time:</span> ${new Date(request.timestamp).toLocaleString()}</p>
+                        `;
+                        requestList.appendChild(requestItem);
+                    });
+                } else {
+                    requestList.innerHTML = '<p class="no-requests">You have no requests yet.</p>';
+                }
+            });
+    }
+    
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
+</body>
+</html>
