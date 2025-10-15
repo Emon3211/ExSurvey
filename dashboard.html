@@ -35,7 +35,7 @@
         }
         .header-right {
             width: 120px;
-            justify-content: flex-end;
+            justify: flex-end;
             position: relative;
         }
         .header-center {
@@ -419,7 +419,7 @@
             <i class="fas fa-user-circle header-icon profile-icon" id="profileIcon"></i>
             <div class="profile-dropdown-content" id="profileDropdown">
                 <a href="profile.html">My Profile</a>
-                <a href="https://wa.me/+989102812284" target="_blank">Contact Us (WhatsApp)</a>
+                <a href="#" target="_blank" id="whatsappContactLink">Contact Us (WhatsApp)</a>
                 <a href="https://www.facebook.com/profile.php?id=61580025557448" target="_blank">Join FB Page</a>
                 <a href="#" id="logoutBtn">Logout</a>
             </div>
@@ -540,11 +540,42 @@
         const balanceTextElement = document.getElementById('balanceText');
         const notificationContentElement = document.getElementById('notificationContent');
         const notificationBadge = document.getElementById('notificationBadge');
+        // নতুন আইডি রেফারেন্স
+        const whatsappContactLink = document.getElementById('whatsappContactLink'); 
+
+        // 🟢 WhatsApp নাম্বার লোড করার ফাংশন
+        function loadWhatsAppContact() {
+            // 'support/whatsapp' পাথে চেক করা হচ্ছে
+            database.ref('support/whatsapp').once('value')
+                .then(snapshot => {
+                    const whatsappNumber = snapshot.val();
+                    if (whatsappNumber) {
+                        // স্পেস বা অন্য প্রতীক মুছে +88 দিয়ে শুরু হলে তা নিশ্চিত করে লিঙ্ক তৈরি করা হচ্ছে
+                        const cleanedNumber = whatsappNumber.replace(/\s/g, '').replace(/^\+/, ''); 
+                        whatsappContactLink.href = `https://wa.me/${cleanedNumber}`;
+                        console.log("WhatsApp Contact Loaded:", whatsappContactLink.href);
+                    } else {
+                        console.warn("WhatsApp number not found in database. Using a placeholder.");
+                        // ডাটাবেসে নাম্বার না পেলে একটি ফলব্যাক লিঙ্ক সেট করা হলো
+                        whatsappContactLink.href = 'mailto:support@exsurvey.com'; 
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading WhatsApp contact:", error);
+                    whatsappContactLink.href = 'mailto:support@exsurvey.com'; 
+                });
+        }
+
 
         // Check for authenticated user and load data
         auth.onAuthStateChanged(user => {
             if (user) {
-                // User is signed in. Load their data.
+                // ইউজার সাইন ইন করলে:
+                
+                // 1. WhatsApp নাম্বার লোড করা
+                loadWhatsAppContact();
+
+                // 2. ইউজার ডাটা লোড করা
                 const userRef = database.ref('users/' + user.uid);
                 userRef.once('value', snapshot => {
                     const userData = snapshot.val();
@@ -559,7 +590,7 @@
                     alert("Error loading user data.");
                 });
 
-                // Listen for unread notifications for the current user
+                // 3. নোটিফিকেশন লিসেনার সেট করা
                 const unreadNotificationsRef = database.ref('users/' + user.uid + '/notifications').orderByChild('read').equalTo(false);
                 unreadNotificationsRef.on('value', snapshot => {
                     const unreadCount = snapshot.numChildren();
@@ -693,4 +724,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
